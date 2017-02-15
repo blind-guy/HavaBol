@@ -19,7 +19,7 @@ public class Scanner
 	
 	private final static String DELIMITERS = " \t;:()\'\"=!<>+-*/[]#^\n,";
 	private final static String OPERATORS = "<>+-*/=!#^";
-	private static final String[] ACCEPTED_OPERATORS = {"++", "--", "+=", "-=", "*=", "/=", "<=", ">=", "==", "!="};
+	private static final String[] ACCEPTED_OPERATORS = {"++", "--", "+=", "-=", "*=", "/=", "<=", ">=", "==", "!=", "//"};
 	
 	public Scanner(String string, SymbolTable symbolTable) throws IOException, ScannerTokenFormatException
 	{
@@ -134,6 +134,14 @@ public class Scanner
 			else if(Scanner.OPERATORS.indexOf(this.textCharM[this.iColPos]) >= 0)
 			{
 				formatOperatorToken(scRtToken);
+				if(scRtToken.tokenStr.equals("//")){
+					scRtToken.tokenStr = "";
+					this.iColPos = 0;
+					this.iSourceLineR++;
+					setTextCharM();
+					return(createNextToken());
+					
+				}
 			}
 			// Now let's handle our separatorsS.
 			else if(Scanner.DELIMITERS.indexOf(this.textCharM[this.iColPos]) >= 0)
@@ -418,3 +426,4 @@ public class Scanner
 		return false;
 	}
 }
+	
