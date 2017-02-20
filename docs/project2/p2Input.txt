@@ -112,4 +112,3 @@ while i < 5:
     i = i + 1;
 endwhile;
 print("\tAfter outer while");
-Bool true = F;
