@@ -438,8 +438,42 @@ public class Scanner
 			scTokenStrBldr.append(this.textCharM[this.iColPos]);
 			this.iColPos++;
 		}
+		
 		// Copy the string token.
 		token.tokenStr = scTokenStrBldr.toString();
+		
+		// If for some reason this is null, we should avoid a NullPointerException
+		// and return.
+		//
+		// TODO: this shouldn't ever happen in release so it should be modified
+		// in the future.
+		if(this.symbolTable == null)
+		{
+			return;
+		}
+		
+		// Get the associated entry from the symbol table if it exists and set
+		// the prime classification.
+		STEntry entry = this.symbolTable.getEntry(token.tokenStr);
+		
+		// If the entry isn't null, then we can modify its sub snad prime classification
+		// depending on the type of entry.
+		if(entry != null)
+		{
+			token.primClassif = entry.primClassif;
+			switch(entry.primClassif)
+			{
+				case Token.CONTROL:
+					token.subClassif = ((STControl) entry).subClassif;
+					break;
+				case Token.FUNCTION:
+					token.subClassif = ((STFunction) entry).definedBy;
+					break;
+				case Token.IDENTIFIER:
+					token.subClassif = ((STIdentifier) entry).dclType;
+					break;
+			}
+		}
 	}
 	
 	/**
