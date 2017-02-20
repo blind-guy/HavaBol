@@ -10,4 +10,10 @@ public class STControl extends STEntry
 		super(symbol, primClassif);
 		this.subClassif = subClassif;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return super.toString() + " subClassif: " + subClassif;
+	}
 }

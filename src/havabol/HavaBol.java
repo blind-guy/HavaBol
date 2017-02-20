@@ -25,7 +25,7 @@ public class HavaBol
     {
         // Create the SymbolTable
     	// SymbolTable symbolTable = new SymbolTable();
-        SymbolTable symbolTable = null;
+        SymbolTable symbolTable = new SymbolTable();
         
         try
         {

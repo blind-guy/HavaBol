@@ -5,9 +5,10 @@ import java.util.ArrayList;
 public class STFunction extends STEntry
 {
 	// TODO: more has to be done here
-	public STFunction(String symbol, int primClassif, int definedBy) {
+	public STFunction(String symbol, int primClassif, int definedBy, int returnType) {
 		super(symbol, primClassif);
 		this.definedBy = definedBy;
+		this.returnType = returnType;
 	}
 
 	// The return type for this STFunction.
@@ -25,5 +26,9 @@ public class STFunction extends STEntry
 	// A SymbolTble reference for this STFunction if it is user-defined.
 	public SymbolTable symbolTable = null;
 	
-	
+	@Override
+	public String toString()
+	{
+		return super.toString() + " definedBy: " + definedBy + " return type: " + returnType;
+	}
 }

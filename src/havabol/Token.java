@@ -54,7 +54,7 @@ public class Token
             , "BOOLEAN"     // 4
             , "STRING"      // 5
             , "DATE"        // 6
-            , "VOID"        // 7
+            , "Void"        // 7
             , "**not used**"// 8
             , "**not used**"// 9 
             , "FLOW"        //10

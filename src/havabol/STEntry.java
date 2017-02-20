@@ -14,4 +14,10 @@ public class STEntry
 		this.symbol = symbol;
 		this.primClassif = primClassif;
 	}
+	
+	@Override
+	public String toString() 
+	{
+		return "symbol: " + symbol + " primClassif: " + primClassif;
+	}
 }

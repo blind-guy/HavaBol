@@ -4,6 +4,7 @@ package havabol;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.Map;
 
 public class SymbolTable
 {
@@ -43,13 +44,15 @@ public class SymbolTable
 		return ht.get(symbol);
 	}
 	
-	// still working on initGlobal. don't expect it to run
+	/**
+	 * 
+	 */
 	private void initGlobal()
 	{
 		java.util.Scanner in = null;
 		try 
 		{
-			in = new java.util.Scanner(new File("/tests/symbols.txt"));
+			in = new java.util.Scanner(new File("tests/symbols.txt"));
 		} 
 		catch (FileNotFoundException e) 
 		{
@@ -71,28 +74,48 @@ public class SymbolTable
 			strPrimClassif = in.next();
 			strSubClassif = in.next();
 			iPrimClassif = hmClassif.get(strPrimClassif.toUpperCase());
-			if (!strSubClassif.equals("-"))
+			
+			/*
+			System.out.println(strName + " strPrimClassif " 
+					+ " " + iPrimClassif + " " + strSubClassif);
+			*/
+			if (iPrimClassif == Token.FUNCTION) // if it's a funciton, set iSubClassif to return type
+				iSubClassif = builtInFuncReturnType(strSubClassif);
+			else if (!strSubClassif.equals("-"))
 				iSubClassif = hmClassif.get(strSubClassif.toUpperCase());
 			else
 				iSubClassif = 0;
-			
-			if (iSubClassif == 0)
+			// System.out.println(iSubClassif);
+		
+			if (iPrimClassif == Token.FUNCTION) 
 			{
-				ht.put(strName, new STEntry(strName, Token.OPERATOR));
+				// note that iSubClassif has the return type
+				ht.put(strName, new STFunction(strName, iPrimClassif, Token.BUILTIN, iSubClassif));
+			}
+			else if (iPrimClassif == Token.CONTROL) 
+			{
+				ht.put(strName, new STControl(strName, iPrimClassif, iSubClassif));
+			}
+			else if (iPrimClassif == Token.OPERATOR)
+			{
+				ht.put(strName, new STEntry(strName, iPrimClassif));
 			}
 			else
 			{
-				if (iPrimClassif == Token.FUNCTION) 
-				{
-					//ht.put(strName, new STFunction(strName, iPrimClassif, iSubClassif));
-				}
-				else if (iPrimClassif == Token.CONTROL) 
-				{
-					ht.put(strName, new STControl(strName, iPrimClassif, iSubClassif));
-				}
+				System.err.println("could not classify token in symbols.txt file");
+				System.exit(-1);
 			}
 			
 		}
+		
+		/* for testing to see if symbols file is working
+		for (String key : ht.keySet())
+		{
+			System.out.println(key + " " + ht.get(key).toString());
+		}
+		System.exit(-1);
+		*/
+		
 		// TODO: an example of how this should work from the SymbolTable notes
 		// which also contain a full list of Havabol-defined entries.
 		//
@@ -113,5 +136,24 @@ public class SymbolTable
 		 * ...
 		 */
 		// ffs there has to be a better way, what the actual fuck is this nonsense 
+	}
+	
+	/**
+	 * builtInFuncReturnType returns the return type of the given builtin function. <p>
+	 * If this function is given a non-builtin function, it returns -1.
+	 * @param func String containing the name of the builtin function
+	 * @return Token.* for corresponding return type, -1 if the function has not been defined
+	 * for HavaBol
+	 */
+	public int builtInFuncReturnType(String func)
+	{
+		if (func.equals("Void"))
+			return Token.VOID;
+		else if (func.equals("Int"))
+		{
+			return Token.INTEGER;
+		}
+		else
+			return -1;
 	}
 }
