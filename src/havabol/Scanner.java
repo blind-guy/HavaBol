@@ -3,6 +3,7 @@ package havabol;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Scanner
 {
@@ -18,6 +19,7 @@ public class Scanner
 	
 	private final static String DELIMITERS = " \t;:()\'\"=!<>+-*/[]#^\n,";
 	private final static String OPERATORS = "<>+-*/=!#^";
+	private static final String[] ACCEPTED_OPERATORS = {"++", "--", "+=", "-=", "*=", "/=", "<=", ">=", "==", "!=", "//"};
 	
 	public Scanner(String string, SymbolTable symbolTable) throws IOException, ScannerTokenFormatException
 	{
@@ -132,6 +134,14 @@ public class Scanner
 			else if(Scanner.OPERATORS.indexOf(this.textCharM[this.iColPos]) >= 0)
 			{
 				formatOperatorToken(scRtToken);
+				if(scRtToken.tokenStr.equals("//")){
+					scRtToken.tokenStr = "";
+					this.iColPos = 0;
+					this.iSourceLineR++;
+					setTextCharM();
+					return(createNextToken());
+					
+				}
 			}
 			// Now let's handle our separatorsS.
 			else if(Scanner.DELIMITERS.indexOf(this.textCharM[this.iColPos]) >= 0)
@@ -315,10 +325,35 @@ public class Scanner
 	{
 		// Set the primary classification.
 		token.primClassif = Token.OPERATOR;
+		
+		
+		
+		//check if next column position is not the end of string and whether it is a operator
+		if((this.iColPos + 1) < this.textCharM.length && Scanner.OPERATORS.indexOf(this.textCharM[this.iColPos + 1]) >= 0 )
+		{
+			
+			//create the compare string that is used to pass into allowedOperators, the 2 on the end is the size of the new string
+			String scCompareSt = new String(this.textCharM, this.iColPos, 2);
+			
+			//checks if the compare string is an allowed operator, if true set the token string
+			if(allowedOperator(scCompareSt))
+			{
+			
+				token.tokenStr = scCompareSt;
+				//advance the column position for the newly added character to token string 
+				this.iColPos++;
+				
+			}else
+			{
+				// else the operator was not allowed set token string to the single character
+				token.tokenStr = Character.toString(this.textCharM[this.iColPos]);
+			}
+		}else{
 			
 		// Copy the character to our token string.
-		token.tokenStr = Character.toString(this.textCharM[this.iColPos]);
-						
+			token.tokenStr = Character.toString(this.textCharM[this.iColPos]);
+			
+		}
 		// Increment the column position.
 		this.iColPos++;
 	}
@@ -376,4 +411,19 @@ public class Scanner
 			this.textCharM = this.sourceLineM.get(iSourceLineR - 1).toCharArray();
 		}
 	}
+	
+	/**
+	 * this function is used to check if two operators, that appear next to each other,
+	 * are actually one operator
+	 * @param possibleOperator
+	 * @return
+	 */
+	private boolean allowedOperator(String possibleOperator){
+		for(int i = 0; i < ACCEPTED_OPERATORS.length; i++){
+			if(possibleOperator.equals(ACCEPTED_OPERATORS[i]))
+				return true;
+		}
+		return false;
+	}
 }
+	
