@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 public class STFunction extends STEntry
 {
-	// more has to be done here
-	public STFunction(String symbol, int primClassif) {
+	// TODO: more has to be done here
+	public STFunction(String symbol, int primClassif, int definedBy) {
 		super(symbol, primClassif);
-		// TODO Auto-generated constructor stub
+		this.definedBy = definedBy;
 	}
 
 	// The return type for this STFunction.

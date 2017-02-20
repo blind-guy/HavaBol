@@ -2,10 +2,10 @@ package havabol;
 
 public class STIdentifier extends STEntry
 {
-	// more has to be done here
+	// TODO: more has to be done here
 	public STIdentifier(String symbol, int primClassif) {
 		super(symbol, primClassif);
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	// The declaration type for this STIdentifier.

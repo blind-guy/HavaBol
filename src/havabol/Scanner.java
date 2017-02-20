@@ -188,7 +188,7 @@ public class Scanner
 					return true;
 				}
 			}
-			// Increment the line count, reseet iColPos and copy the next line to textCharM
+			// Increment the line count, reset iColPos and copy the next line to textCharM
 			// if there's more to scan.
 			this.iSourceLineR++;
 			this.iColPos = 0;

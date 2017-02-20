@@ -20,6 +20,29 @@ public class SymbolTable
 		initGlobal();
 	}
 
+	/**
+	 * Stores the symbol and its corresponding entry in the SymbolTable.
+	 * 
+	 * It's important to note that classification of symbols is done by the parser,
+	 * not the Scanner or SymbolTable class.
+	 * @param symbol
+	 * @param entry
+	 */
+	public void putSymbole(String symbol, STEntry entry)
+	{
+		ht.put(symbol, entry);
+	}
+	
+	/**
+	 * 
+	 * @param symbol representing the key for looking up this entry
+	 * @return an STEntry object stored for this key
+	 */
+	public STEntry getEntry(String symbol)
+	{
+		return ht.get(symbol);
+	}
+	
 	// still working on initGlobal. don't expect it to run
 	private void initGlobal()
 	{
