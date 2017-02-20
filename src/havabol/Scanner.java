@@ -319,7 +319,7 @@ public class Scanner
 		// Now we need to loop until we hit end of line or a delimiter.
 		while(true)
 		{
-			// We're at end of line or find a delimieter, thenand can return the token
+			// We're at end of line or find a delimiter, then we can return the token
 			// string.
 			if(this.iColPos >= this.textCharM.length || 
 			   Scanner.DELIMITERS.indexOf(this.textCharM[this.iColPos]) >= 0)
@@ -442,36 +442,45 @@ public class Scanner
 		// Copy the string token.
 		token.tokenStr = scTokenStrBldr.toString();
 		
-		// If for some reason this is null, we should avoid a NullPointerException
-		// and return.
-		//
-		// TODO: this shouldn't ever happen in release so it should be modified
-		// in the future.
-		if(this.symbolTable == null)
+		// Check to see if we have a T/F string.
+		if(token.tokenStr.length() == 1 &&
+				(token.tokenStr.equals("T") || token.tokenStr.equals("F")))
 		{
-			return;
+			token.subClassif = Token.BOOLEAN;
 		}
-		
-		// Get the associated entry from the symbol table if it exists and set
-		// the prime classification.
-		STEntry entry = this.symbolTable.getEntry(token.tokenStr);
-		
-		// If the entry isn't null, then we can modify its sub snad prime classification
-		// depending on the type of entry.
-		if(entry != null)
+		else
 		{
-			token.primClassif = entry.primClassif;
-			switch(entry.primClassif)
+			// If for some reason this is null, we should avoid a NullPointerException
+			// and return.
+			//
+			// TODO: this shouldn't ever happen in release so it should be modified
+			// in the future.
+			if(this.symbolTable == null)
 			{
-				case Token.CONTROL:
-					token.subClassif = ((STControl) entry).subClassif;
-					break;
-				case Token.FUNCTION:
-					token.subClassif = ((STFunction) entry).definedBy;
-					break;
-				case Token.IDENTIFIER:
-					token.subClassif = ((STIdentifier) entry).dclType;
-					break;
+				return;
+			}
+			
+			// Get the associated entry from the symbol table if it exists and set
+			// the prime classification.
+			STEntry entry = this.symbolTable.getEntry(token.tokenStr);
+			
+			// If the entry isn't null, then we can modify its sub snad prime classification
+			// depending on the type of entry.
+			if(entry != null)
+			{
+				token.primClassif = entry.primClassif;
+				switch(entry.primClassif)
+				{
+					case Token.CONTROL:
+						token.subClassif = ((STControl) entry).subClassif;
+						break;
+					case Token.FUNCTION:
+						token.subClassif = ((STFunction) entry).definedBy;
+						break;
+					case Token.IDENTIFIER:
+						token.subClassif = ((STIdentifier) entry).dclType;
+						break;
+				}
 			}
 		}
 	}
