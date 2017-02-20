@@ -241,10 +241,53 @@ public class Scanner
 					" is not terminated in-line");
 			}
 			// We've hit our delimiter and need to check if it's escaped.
-			else if(this.textCharM[this.iColPos] == scStrTokenDelim && this.textCharM[this.iColPos - 1] != '\\')
+			// else if(this.textCharM[this.iColPos] == scStrTokenDelim && this.textCharM[this.iColPos - 1] != '\\')
+			else if(this.textCharM[this.iColPos] == scStrTokenDelim)
 			{
 				this.iColPos++;
 				break;
+			}
+			// We've hit a single backslash and need to see if this is a special
+			// character.
+			else if(this.textCharM[this.iColPos] == '\\' && this.iColPos < this.textCharM.length - 1)
+			{
+				switch(this.textCharM[this.iColPos + 1])
+				{
+					case 't':
+						scTokenStrBldr.append('\t');
+						this.iColPos += 2;
+						break;
+					case 'b':
+						scTokenStrBldr.append('\b');
+						this.iColPos += 2;
+						break;
+					case 'n':
+						scTokenStrBldr.append('\n');
+						this.iColPos += 2;
+						break;
+					case 'r':
+						scTokenStrBldr.append('\r');
+						this.iColPos += 2;
+						break;
+					case 'f': 
+						scTokenStrBldr.append('\f');
+						this.iColPos += 2;
+						break;
+					case '\'':
+						scTokenStrBldr.append('\'');
+						this.iColPos += 2;
+						break;
+					case '"':
+						scTokenStrBldr.append('\"');
+						this.iColPos += 2;
+						break;
+					case '\\':
+						scTokenStrBldr.append('\\');
+						this.iColPos += 2;
+						break;
+					default: 
+						throw new ScannerTokenFormatException("SCANNER ERROR: invalid escape sequence on line " + iSourceLineR + " at column " + iColPos + ". Valid ones are  \\b  \\t  \\n  \\f  \\r  \\\"  \\' and \\\\\n");
+				}
 			}
 			// We're not at EOF and our delimiter was escaped so we can append whatever character we've
 			// found to our String.

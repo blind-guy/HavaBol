@@ -24,7 +24,8 @@ public class HavaBol
     public static void main(String[] args) 
     {
         // Create the SymbolTable
-        SymbolTable symbolTable = new SymbolTable();
+    	// SymbolTable symbolTable = new SymbolTable();
+        SymbolTable symbolTable = null;
         
         try
         {
@@ -46,3 +47,4 @@ public class HavaBol
         }
     }
 }
+
