@@ -8,4 +8,10 @@ public class STEntry
 	// The prime classification for the STEntry, corresponds to what's 
 	// available in havabol.Token;
 	public int primClassif;
+	
+	public STEntry(String symbol, int primClassif)
+	{
+		this.symbol = symbol;
+		this.primClassif = primClassif;
+	}
 }

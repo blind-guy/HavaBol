@@ -1,6 +1,8 @@
 package havabol;
 //TODO See SymbolTable notes for a full description of this class.
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 
 public class SymbolTable
@@ -18,8 +20,56 @@ public class SymbolTable
 		initGlobal();
 	}
 
+	// still working on initGlobal. don't expect it to run
 	private void initGlobal()
 	{
+		java.util.Scanner in = null;
+		try 
+		{
+			in = new java.util.Scanner(new File("/tests/symbols.txt"));
+		} 
+		catch (FileNotFoundException e) 
+		{
+			System.err.println("symbols.txt does not exist in tests folder. Fatal error.");
+			System.exit(-1);
+		}
+		
+		String strName, strPrimClassif, strSubClassif;
+		int iPrimClassif=0, iSubClassif=0;
+		HashMap<String, Integer> hmClassif = new HashMap<String, Integer>();
+		for (int i=0; i<Token.strPrimClassifM.length; i++)
+			hmClassif.put(Token.strPrimClassifM[i], i);
+		for (int i=0; i<Token.strSubClassifM.length; i++)
+			hmClassif.put(Token.strSubClassifM[i], i);
+		
+		while(in.hasNext())
+		{
+			strName = in.next();
+			strPrimClassif = in.next();
+			strSubClassif = in.next();
+			iPrimClassif = hmClassif.get(strPrimClassif.toUpperCase());
+			if (!strSubClassif.equals("-"))
+				iSubClassif = hmClassif.get(strSubClassif.toUpperCase());
+			else
+				iSubClassif = 0;
+			
+			if (iSubClassif == 0)
+			{
+				ht.put(strName, new STEntry(strName, Token.OPERATOR));
+			}
+			else
+			{
+				if (iPrimClassif == Token.FUNCTION) 
+				{
+					//ht.put(strName, new STFunction(strName, iPrimClassif, iSubClassif));
+				}
+				else if (iPrimClassif == Token.CONTROL) 
+				{
+					ht.put(strName, new STControl(strName, iPrimClassif, iSubClassif));
+				}
+			}
+			
+		}
 		// TODO: an example of how this should work from the SymbolTable notes
 		// which also contain a full list of Havabol-defined entries.
 		//

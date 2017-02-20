@@ -4,6 +4,12 @@ import java.util.ArrayList;
 
 public class STFunction extends STEntry
 {
+	// more has to be done here
+	public STFunction(String symbol, int primClassif) {
+		super(symbol, primClassif);
+		// TODO Auto-generated constructor stub
+	}
+
 	// The return type for this STFunction.
 	public int returnType;
 	
@@ -18,4 +24,6 @@ public class STFunction extends STEntry
 	
 	// A SymbolTble reference for this STFunction if it is user-defined.
 	public SymbolTable symbolTable = null;
+	
+	
 }
