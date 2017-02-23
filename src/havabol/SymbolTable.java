@@ -52,7 +52,7 @@ public class SymbolTable
 		java.util.Scanner in = null;
 		try 
 		{
-			in = new java.util.Scanner(new File("tests/symbols.txt"));
+			in = new java.util.Scanner(new File("docs/lang/symbols.txt"));
 		} 
 		catch (FileNotFoundException e) 
 		{
