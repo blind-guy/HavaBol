@@ -100,6 +100,10 @@ public class SymbolTable
 			{
 				ht.put(strName, new STEntry(strName, iPrimClassif));
 			}
+			else if (iPrimClassif == Token.DEBUG)
+			{
+				ht.put(strName, new STEntry(strName, iPrimClassif));
+			}
 			else
 			{
 				System.err.println("could not classify token in symbols.txt file");

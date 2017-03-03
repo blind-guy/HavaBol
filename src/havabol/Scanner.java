@@ -16,6 +16,7 @@ public class Scanner
 	public int iColPos 						= 0;
 	public Token currentToken  				= new Token();
 	public Token nextToken 					= null;
+	private Debug dBug;
 	
 	private final static String DELIMITERS = " \t;:()\'\"=!<>+-*/[]#^\n,";
 	private final static String OPERATORS = "<>+-*/=!#^";
@@ -71,6 +72,14 @@ public class Scanner
 		}
 		this.currentToken = copyToken(this.nextToken);
 		this.nextToken = createNextToken();
+		
+		// bShowToken is set to on and the current token will print
+		// i'm thinking we should pass in the Debug class from parse class
+		if(dBug.getShowToken())
+		{
+			currentToken.printToken();
+		}
+		
 		return this.currentToken.tokenStr;
 	}
 	
