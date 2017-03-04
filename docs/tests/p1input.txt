@@ -1,7 +1,7 @@
 Int x;
 Float pi;
 String yStr;
-
+debug bShowToken on; 
 x = 11;
 x = x + 1;
 pi = 3.14;
