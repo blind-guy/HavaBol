@@ -1,0 +1,251 @@
+try {
+	ResultValue anInt = new ResultValue(Token.INTEGER, 45);
+	ResultValue aFloat = new ResultValue(Token.FLOAT, 25.5);
+	System.out.println(anInt.toString() + " + " + anInt.toString() + " = " + anInt.add(anInt));
+	System.out.println(aFloat.toString() + " + " + anInt.toString() + " = " + aFloat.add(anInt));
+	System.out.println(anInt.toString() + " + " + aFloat.toString() + " = " + anInt.add(aFloat));
+	System.out.println(aFloat.toString() + " + " + aFloat.toString() + " = " + aFloat.add(aFloat));
+	
+	System.out.println(anInt.toString() + " - " + anInt.toString() + " = " + anInt.subtract(anInt));
+	System.out.println(aFloat.toString() + " - " + anInt.toString() + " = " + aFloat.subtract(anInt));
+	System.out.println(anInt.toString() + " - " + aFloat.toString() + " = " + anInt.subtract(aFloat));
+	System.out.println(aFloat.toString() + " - " + aFloat.toString() + " = " + aFloat.subtract(aFloat));
+	
+} catch (Exception e) {
+	e.printStackTrace();
+}
+
+RESULT:
+
+INTEGER 45 + INTEGER 45 = INTEGER 90
+FLOAT 25.5 + INTEGER 45 = FLOAT 70.5
+INTEGER 45 + FLOAT 25.5 = INTEGER 70
+FLOAT 25.5 + FLOAT 25.5 = FLOAT 51.0
+INTEGER 45 - INTEGER 45 = INTEGER 0
+FLOAT 25.5 - INTEGER 45 = FLOAT -19.5
+INTEGER 45 - FLOAT 25.5 = INTEGER 20
+FLOAT 25.5 - FLOAT 25.5 = FLOAT 0.0
+
+try {
+	ResultValue anInt = new ResultValue(Token.INTEGER, 45);
+	ResultValue aFloat = new ResultValue(Token.FLOAT, 25.5);
+	ResultValue res = anInt.add(aFloat);
+	System.out.println(anInt.toString() + " + " + anInt.toString() + " = " + res.toString());
+	System.out.println(anInt.toString() + " + Result: " + res.toString() + " = " + anInt.add(res));
+	System.out.println(aFloat.toString() + " + Result: " + res.toString() + " = " + aFloat.add(res));
+	System.out.print(res.toString() + " + " + res.add(aFloat) + " = ");
+	res = res.add(aFloat);
+	System.out.println(res.toString());
+	
+	
+} catch (Exception e) {
+	e.printStackTrace();
+}
+
+RESULT:
+
+INTEGER 45 + INTEGER 45 = INTEGER 70
+INTEGER 45 + Result: INTEGER 70 = INTEGER 115
+FLOAT 25.5 + Result: INTEGER 70 = FLOAT 95.5
+INTEGER 70 + INTEGER 95 = INTEGER 95
+
+try {
+	ResultValue anInt = new ResultValue(Token.INTEGER, "45");
+	ResultValue aFloat = new ResultValue(Token.FLOAT, "25.5");
+	ResultValue res = anInt.add(aFloat);
+	System.out.println(anInt.toString() + " + " + anInt.toString() + " = " + res.toString());
+	System.out.println(anInt.toString() + " + Result: " + res.toString() + " = " + anInt.add(res));
+	System.out.println(aFloat.toString() + " + Result: " + res.toString() + " = " + aFloat.add(res));
+	System.out.print(res.toString() + " + " + res.add(aFloat) + " = ");
+	res = res.add(aFloat);
+	System.out.println(res.toString());
+	
+	
+} catch (Exception e) {
+	e.printStackTrace();
+}
+
+RESULT: 
+
+INTEGER 45 + INTEGER 45 = INTEGER 70
+INTEGER 45 + Result: INTEGER 70 = INTEGER 115
+FLOAT 25.5 + Result: INTEGER 70 = FLOAT 95.5
+INTEGER 70 + INTEGER 95 = INTEGER 95
+
+(try/catch omitted)
+ResultValue anInt = new ResultValue(Token.INTEGER, 45.0);
+ResultValue aBool = new ResultValue(Token.BOOLEAN, "T");
+ResultValue res = anInt.add(aBool);
+
+RESULT: 
+
+java.lang.NumberFormatException: For input string: "45.0"
+	at java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)
+	at java.lang.Integer.parseInt(Integer.java:580)
+	at java.lang.Integer.parseInt(Integer.java:615)
+	at havabol.Numeric.<init>(Numeric.java:23)
+	at havabol.ResultValue.<init>(ResultValue.java:17)
+	at havabol.TestMain.main(TestMain.java:12)
+
+(try/catch omitted)
+ResultValue anInt = new ResultValue(Token.INTEGER, 45);
+ResultValue aBool = new ResultValue(Token.BOOLEAN, "T");
+ResultValue res = anInt.add(aBool);
+
+RESULT:
+
+ResultValue anInt = new ResultValue(Token.INTEGER, 45);
+ResultValue aBool = new ResultValue(Token.BOOLEAN, "T");
+ResultValue res = anInt.add(aBool);
+
+(try/catch omitted)
+ResultValue anInt = new ResultValue(Token.INTEGER, 45);
+ResultValue aBool = new ResultValue(Token.BOOLEAN, "T");
+ResultValue res = aBool.add(anInt);
+
+RESULT:
+
+havabol.ImproperOperationException: Operand's datatype is inappropriate for addition operations
+	at havabol.ResultValue.add(ResultValue.java:83)
+	at havabol.TestMain.main(TestMain.java:14)
+
+res = anInt.divide(new ResultValue(Token.INTEGER, 0))
+
+RESULT:
+
+havabol.DivideByZeroException: Cannot divide by zero
+	at havabol.ResultValue.divide(ResultValue.java:269)
+	at havabol.TestMain.main(TestMain.java:14)
+
+	
+ResultValue anInt = new ResultValue(Token.INTEGER, "45");
+ResultValue aFloat = new ResultValue(Token.STRING, "2.3");
+ResultValue res = anInt.performOperation(aFloat, "+");
+System.out.println(anInt + " + " + aFloat + " = " + res);
+
+RESULT:
+
+INTEGER 45 + STRING 2.3 = INTEGER 47
+
+ResultValue anInt = new ResultValue(Token.STRING, "45");
+ResultValue aFloat = new ResultValue(Token.STRING, "2.3");
+ResultValue res = anInt.performOperation(aFloat, "+");
+System.out.println(anInt + " + " + aFloat + " = " + res);
+
+havabol.ImproperOperationException: Operand's datatype is inappropriate for + operations
+	at havabol.ResultValue.performOperation(ResultValue.java:72)
+	at havabol.TestMain.main(TestMain.java:14)
+
+ResultValue anInt = new ResultValue(Token.INTEGER, "45");
+ResultValue aFloat = new ResultValue(Token.STRING, "2.3");
+ResultValue res = anInt.performOperation(aFloat, "+");
+System.out.println(anInt + " + " + aFloat + " = " + res);
+
+ResultValue anInt2 = new ResultValue(Token.INTEGER, "45");
+ResultValue aFloat2 = new ResultValue(Token.STRING, "2.3");
+ResultValue res2 = anInt2.performOperation(aFloat2, "-");
+System.out.println(anInt2 + " - " + aFloat2 + " = " + res2);
+
+ResultValue anInt3 = new ResultValue(Token.INTEGER, "45");
+ResultValue aFloat3 = new ResultValue(Token.STRING, "2.3");
+ResultValue res3 = anInt3.performOperation(aFloat3, "*");
+System.out.println(anInt3 + " * " + aFloat3 + " = " + res3);
+
+ResultValue anInt4 = new ResultValue(Token.INTEGER, "45");
+ResultValue aFloat4 = new ResultValue(Token.STRING, "2.3");
+ResultValue res4 = anInt4.performOperation(aFloat4, "/");
+System.out.println(anInt4 + " / " + aFloat4 + " = " + res4);
+
+RESULT:
+
+INTEGER 45 + STRING 2.3 = INTEGER 47
+INTEGER 45 - STRING 2.3 = INTEGER 43
+INTEGER 45 * STRING 2.3 = INTEGER 90
+INTEGER 45 / STRING 2.3 = INTEGER 22
+
+ResultValue anInt = new ResultValue(Token.FLOAT, "45");
+ResultValue aFloat = new ResultValue(Token.STRING, "2.3");
+ResultValue res = anInt.performOperation(aFloat, "+");
+System.out.println(anInt + " + " + aFloat + " = " + res);
+
+RESULT:
+
+FLOAT 45.0 + STRING 2.3 = FLOAT 47.3
+
+ResultValue anInt4 = new ResultValue(Token.INTEGER, "45");
+ResultValue aFloat4 = new ResultValue(Token.STRING, "0.0");
+ResultValue res4 = anInt4.performOperation(aFloat4, "/");
+System.out.println(anInt4 + " / " + aFloat4 + " = " + res4);
+
+RESULT:
+
+havabol.DivideByZeroException: Cannot divide by zero
+	at havabol.Numeric.divide(Numeric.java:80)
+	at havabol.ResultValue.performOperation(ResultValue.java:60)
+	at havabol.TestMain.main(TestMain.java:29)
+
+ResultValue anInt3 = new ResultValue(Token.INTEGER, "45");
+ResultValue aFloat3 = new ResultValue(Token.STRING, "2..3");
+ResultValue res3 = anInt3.performOperation(aFloat3, "*");
+System.out.println(anInt3 + " * " + aFloat3 + " = " + res3);
+
+RESULT:
+
+java.lang.NumberFormatException: multiple points
+	at sun.misc.FloatingDecimal.readJavaFormatString(FloatingDecimal.java:1914)
+	at sun.misc.FloatingDecimal.parseDouble(FloatingDecimal.java:110)
+	at java.lang.Double.parseDouble(Double.java:538)
+	at havabol.Numeric.<init>(Numeric.java:36)
+	at havabol.ResultValue.performOperation(ResultValue.java:52)
+	at havabol.TestMain.main(TestMain.java:24)
+
+ResultValue anInt4 = new ResultValue(Token.INTEGER, "45");
+ResultValue aFloat4 = new ResultValue(Token.STRING, "2.3");
+ResultValue res4 = anInt4.performOperation(aFloat4, "^");
+System.out.println(anInt4 + " ^ " + aFloat4 + " = " + res4);
+
+RESULT:
+
+INTEGER 45 ^ STRING 2.3 = INTEGER 2025
+
+ResultValue aBool1 = new ResultValue(Token.BOOLEAN, "T");
+ResultValue aBool2 = new ResultValue(Token.BOOLEAN, "T");
+ResultValue res = aBool1.performOperation(aBool2, "and");
+System.out.println(aBool1 + " and " + aBool2 + " = " + res);
+
+RESULT:
+
+BOOLEAN T and BOOLEAN T = BOOLEAN T
+
+ResultValue aBool1 = new ResultValue(Token.BOOLEAN, "T");
+ResultValue aBool2 = new ResultValue(Token.BOOLEAN, "F");
+ResultValue res = aBool1.performOperation(aBool2, "and");
+System.out.println(aBool1 + " and " + aBool2 + " = " + res);
+
+RESULT:
+
+BOOLEAN T and BOOLEAN F = BOOLEAN F
+
+ResultValue aBool1 = new ResultValue(Token.BOOLEAN, "T");
+ResultValue aBool2 = new ResultValue(Token.BOOLEAN, "F");
+ResultValue res = aBool1.performOperation(aBool2, "or");
+System.out.println(aBool1 + " or " + aBool2 + " = " + res);
+
+RESULT:
+
+BOOLEAN T or BOOLEAN F = BOOLEAN T
+
+ResultValue anInt1 = new ResultValue(Token.INTEGER, "1");
+ResultValue anInt2 = new ResultValue(Token.INTEGER, "1");
+ResultValue res = anInt1.performOperation(anInt2, "==");
+System.out.println(anInt1 + " == " + anInt2 + " = " + res);
+
+ResultValue anInt3 = new ResultValue(Token.INTEGER, "1");
+ResultValue anInt4 = new ResultValue(Token.INTEGER, "2");
+ResultValue res2 = anInt3.performOperation(anInt4, "==");
+System.out.println(anInt3 + " == " + anInt4 + " = " + res2);
+
+RESULT:
+
+INTEGER 1 == INTEGER 1 = BOOLEAN T
+INTEGER 1 == INTEGER 2 = BOOLEAN F
