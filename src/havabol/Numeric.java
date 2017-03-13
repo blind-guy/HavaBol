@@ -112,6 +112,16 @@ public class Numeric
 			return doubleValue == rightOperand.doubleValue;
 	}
 	
+	public boolean notequals(Numeric rightOperand)
+	{
+		if (type == Token.INTEGER)
+		{
+			return intValue != rightOperand.intValue;
+		}
+		else
+			return doubleValue != rightOperand.doubleValue;
+	}
+	
 	public boolean lessthan(Numeric rightOperand)
 	{
 		if (type == Token.INTEGER)

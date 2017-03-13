@@ -62,6 +62,46 @@ public class ResultValue {
 						result = "F";
 					resultType = Token.BOOLEAN;
 				}
+				else if (operation.equals("!="))
+				{
+					if ( ((Numeric) value).notequals((Numeric) rightOperand.value) == true)
+						result = "T";
+					else
+						result = "F";
+					resultType = Token.BOOLEAN;
+				}
+				else if (operation.equals("<"))
+				{
+					if ( ((Numeric) value).lessthan((Numeric) rightOperand.value) == true)
+						result = "T";
+					else
+						result = "F";
+					resultType = Token.BOOLEAN;
+				}
+				else if (operation.equals("<="))
+				{
+					if ( ((Numeric) value).lessthanequalto((Numeric) rightOperand.value) == true)
+						result = "T";
+					else
+						result = "F";
+					resultType = Token.BOOLEAN;
+				}
+				else if (operation.equals(">"))
+				{
+					if ( ((Numeric) value).greaterthan((Numeric) rightOperand.value) == true)
+						result = "T";
+					else
+						result = "F";
+					resultType = Token.BOOLEAN;
+				}
+				else if (operation.equals(">="))
+				{
+					if ( ((Numeric) value).greaterthanequalto((Numeric) rightOperand.value) == true)
+						result = "T";
+					else
+						result = "F";
+					resultType = Token.BOOLEAN;
+				}
 				else
 					throw new ImproperOperationException(operation + " is not a valid numeric operation");
 			}
@@ -86,6 +126,46 @@ public class ResultValue {
 						result = "F";
 					resultType = Token.BOOLEAN;
 				}
+				else if (operation.equals("!="))
+				{
+					if ( ((Numeric) value).notequals(tempRightOperand) == true)
+						result = "T";
+					else
+						result = "F";
+					resultType = Token.BOOLEAN;
+				}
+				else if (operation.equals("<"))
+				{
+					if ( ((Numeric) value).lessthan(tempRightOperand) == true)
+						result = "T";
+					else
+						result = "F";
+					resultType = Token.BOOLEAN;
+				}
+				else if (operation.equals("<="))
+				{
+					if ( ((Numeric) value).lessthanequalto(tempRightOperand) == true)
+						result = "T";
+					else
+						result = "F";
+					resultType = Token.BOOLEAN;
+				}
+				else if (operation.equals(">"))
+				{
+					if ( ((Numeric) value).greaterthan(tempRightOperand) == true)
+						result = "T";
+					else
+						result = "F";
+					resultType = Token.BOOLEAN;
+				}
+				else if (operation.equals(">="))
+				{
+					if ( ((Numeric) value).greaterthanequalto(tempRightOperand) == true)
+						result = "T";
+					else
+						result = "F";
+					resultType = Token.BOOLEAN;
+				}
 				else
 					throw new ImproperOperationException(operation + " is not a valid numeric operation");
 			}
@@ -99,7 +179,7 @@ public class ResultValue {
 		{
 			if (rightOperand == null)
 			{
-				if (operation.equals("!"))
+				if (operation.equals("not"))
 				{
 					if (value.equals("T"))
 						result = "F";
@@ -123,6 +203,73 @@ public class ResultValue {
 				throw new ImproperOperationException("Operand's datatype is inappropriate for " 
 						+ operation + " operations");
 		}
+		else if (iDataType == Token.STRING)
+		{
+			String rightOperStr = "";
+			
+			if (rightOperand.iDataType == Token.STRING)
+				rightOperStr = (String) rightOperand.value;
+			else if (rightOperand.iDataType == Token.BOOLEAN)
+				rightOperStr = (String) rightOperand.value;
+			else if (rightOperand.isNum)
+				rightOperStr = ((Numeric) rightOperand.value).toString();
+			else
+				throw new ImproperOperationException("Operand's datatype is inappropriate for " 
+						+ operation + " operations");
+			
+			if (operation.equals("#"))
+				result = ((String) value).concat(rightOperStr);
+			else if (operation.equals("=="))
+			{
+				if (((String) value).equals(rightOperStr))
+					result = "T";
+				else
+					result = "F";
+				resultType = Token.BOOLEAN;
+			}
+			else if (operation.equals("!="))
+			{
+				if (!((String) value).equals(rightOperStr))
+					result = "T";
+				else
+					result = "F";
+				resultType = Token.BOOLEAN;
+			}
+			else if (operation.equals("<"))
+			{
+				if (((String) value).compareTo(rightOperStr) < 0)
+					result = "T";
+				else
+					result = "F";
+				resultType = Token.BOOLEAN;
+			}
+			else if (operation.equals("<="))
+			{
+				if (((String) value).compareTo(rightOperStr) <= 0)
+					result = "T";
+				else
+					result = "F";
+				resultType = Token.BOOLEAN;
+			}
+			else if (operation.equals(">"))
+			{
+				if (((String) value).compareTo(rightOperStr) > 0)
+					result = "T";
+				else
+					result = "F";
+				resultType = Token.BOOLEAN;
+			}
+			else if (operation.equals(">="))
+			{
+				if (((String) value).compareTo(rightOperStr) >= 0)
+					result = "T";
+				else
+					result = "F";
+				resultType = Token.BOOLEAN;
+			}
+			else
+				throw new ImproperOperationException(operation + " is not a valid string operation");
+		}
 		else 
 		{
 			throw new ImproperOperationException("Operand's datatype is inappropriate for " 
@@ -134,25 +281,39 @@ public class ResultValue {
 	
 	public String performBooleanOperation(ResultValue rightOperand, String operation)
 	{
-		boolean o1, o2;
+		boolean leftOper, rightOper;
 		if (value.equals("T"))
-			o1 = true;
+			leftOper = true;
 		else
-			o1 = false;
+			leftOper = false;
 		if (rightOperand.value.equals("T"))
-			o2 = true;
+			rightOper = true;
 		else
-			o2 = false;
+			rightOper = false;
 		if (operation.equals("and"))
 		{
-			if (o1 && o2)
+			if (leftOper && rightOper)
 				return "T";
 			else
 				return "F";
 		}
 		else if (operation.equals("or"))
 		{
-			if (o1 || o2)
+			if (leftOper || rightOper)
+				return "T";
+			else
+				return "F";
+		}
+		else if (operation.equals("=="))
+		{
+			if (leftOper == rightOper)
+				return "T";
+			else
+				return "F";
+		}
+		else if (operation.equals("!="))
+		{
+			if (leftOper == rightOper)
 				return "T";
 			else
 				return "F";

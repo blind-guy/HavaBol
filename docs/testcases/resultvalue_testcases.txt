@@ -249,3 +249,94 @@ RESULT:
 
 INTEGER 1 == INTEGER 1 = BOOLEAN T
 INTEGER 1 == INTEGER 2 = BOOLEAN F
+
+
+ResultValue anInt1 = new ResultValue(Token.INTEGER, "1");
+ResultValue res = anInt1.performOperation(null, "-");
+System.out.println("U- " + anInt1 + " = " + res);
+
+RESULT:
+
+U- INTEGER 1 = INTEGER -1
+
+ResultValue anInt1 = new ResultValue(Token.INTEGER, "1");
+ResultValue anInt2 = new ResultValue(Token.INTEGER, "1");
+ResultValue res = anInt1.performOperation(anInt2, ">");
+System.out.println(anInt1 + " > " + anInt2 + " = " + res);
+
+ResultValue anInt3 = new ResultValue(Token.INTEGER, "1");
+ResultValue anInt4 = new ResultValue(Token.INTEGER, "1");
+ResultValue res2 = anInt3.performOperation(anInt4, "==");
+System.out.println(anInt3 + " >= " + anInt4 + " = " + res2);
+
+RESULT:
+
+INTEGER 1 > INTEGER 1 = BOOLEAN F
+INTEGER 1 >= INTEGER 1 = BOOLEAN T
+
+ResultValue anInt1 = new ResultValue(Token.INTEGER, "1");
+ResultValue anInt2 = new ResultValue(Token.INTEGER, "2");
+ResultValue res = anInt1.performOperation(anInt2, "<");
+System.out.println(anInt1 + " < " + anInt2 + " = " + res);
+
+ResultValue anInt3 = new ResultValue(Token.INTEGER, "2");
+ResultValue anInt4 = new ResultValue(Token.INTEGER, "1");
+ResultValue res2 = anInt3.performOperation(anInt4, "<=");
+System.out.println(anInt3 + " <= " + anInt4 + " = " + res2);
+
+RESULT:
+
+INTEGER 1 < INTEGER 2 = BOOLEAN T
+INTEGER 2 <= INTEGER 1 = BOOLEAN F
+
+ResultValue anInt1 = new ResultValue(Token.STRING, "1");
+ResultValue anInt2 = new ResultValue(Token.INTEGER, "2");
+ResultValue res = anInt1.performOperation(anInt2, "<");
+System.out.println(anInt1 + " < " + anInt2 + " = " + res);
+
+ResultValue anInt3 = new ResultValue(Token.INTEGER, "2");
+ResultValue anInt4 = new ResultValue(Token.STRING, "1");
+ResultValue res2 = anInt3.performOperation(anInt4, "<=");
+System.out.println(anInt3 + " <= " + anInt4 + " = " + res2);
+
+ResultValue anInt5 = new ResultValue(Token.STRING, "2");
+ResultValue anInt6 = new ResultValue(Token.INTEGER, "1");
+ResultValue res3 = anInt5.performOperation(anInt6, "#");
+System.out.println(anInt5 + " # " + anInt6 + " = " + res3);
+
+anInt5 = new ResultValue(Token.STRING, "2");
+anInt6 = new ResultValue(Token.STRING, "1");
+res3 = anInt5.performOperation(anInt6, "#");
+System.out.println(anInt5 + " # " + anInt6 + " = " + res3);
+
+RESULT:
+
+STRING 1 < INTEGER 2 = BOOLEAN T
+INTEGER 2 <= STRING 1 = BOOLEAN F
+STRING 2 # INTEGER 1 = STRING 21
+STRING 2 # STRING 1 = STRING 21
+
+ResultValue anInt1 = new ResultValue(Token.STRING, "1");
+ResultValue anInt2 = new ResultValue(Token.INTEGER, "1");
+ResultValue res = anInt1.performOperation(anInt2, "==");
+System.out.println(anInt1 + " == " + anInt2 + " = " + res);
+
+ResultValue anInt3 = new ResultValue(Token.STRING, "T");
+ResultValue anInt4 = new ResultValue(Token.STRING, "U");
+ResultValue res2 = anInt3.performOperation(anInt4, "<=");
+System.out.println(anInt3 + " <= " + anInt4 + " = " + res2);
+
+RESULT:
+
+STRING 1 == INTEGER 1 = BOOLEAN T
+STRING T <= STRING U = BOOLEAN T
+
+ResultValue anInt3 = new ResultValue(Token.STRING, "T");
+ResultValue anInt4 = new ResultValue(Token.BOOLEAN, "T");
+ResultValue res2 = anInt3.performOperation(anInt4, "<=");
+System.out.println(anInt3 + " <= " + anInt4 + " = " + res2);
+
+RESULT:
+
+STRING T <= BOOLEAN T = BOOLEAN T
+
