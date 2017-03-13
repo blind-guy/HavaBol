@@ -29,7 +29,7 @@ public class SymbolTable
 	 * @param symbol
 	 * @param entry
 	 */
-	public void putSymbole(String symbol, STEntry entry)
+	public void putSymbol(String symbol, STEntry entry)
 	{
 		ht.put(symbol, entry);
 	}
