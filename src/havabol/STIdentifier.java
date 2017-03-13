@@ -3,9 +3,9 @@ package havabol;
 public class STIdentifier extends STEntry
 {
 	// TODO: more has to be done here
-	public STIdentifier(String symbol, int primClassif) {
+	public STIdentifier(String symbol, int primClassif)
+	{
 		super(symbol, primClassif);
-		
 	}
 
 	// The declaration type for this STIdentifier.

@@ -29,7 +29,7 @@ public class SymbolTable
 	 * @param symbol
 	 * @param entry
 	 */
-	public void putSymbole(String symbol, STEntry entry)
+	public void putSymbol(String symbol, STEntry entry)
 	{
 		ht.put(symbol, entry);
 	}
@@ -97,6 +97,10 @@ public class SymbolTable
 				ht.put(strName, new STControl(strName, iPrimClassif, iSubClassif));
 			}
 			else if (iPrimClassif == Token.OPERATOR)
+			{
+				ht.put(strName, new STEntry(strName, iPrimClassif));
+			}
+			else if (iPrimClassif == Token.DEBUG)
 			{
 				ht.put(strName, new STEntry(strName, iPrimClassif));
 			}

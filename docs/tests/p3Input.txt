@@ -1,9 +1,11 @@
+debug bShowToken on;
 Int i;
 Float pi;
 String day;
    day 
    = 
    "Sunday";
+debug bShowToken off;
 String name;
 name = "Anita Goodgrade";
 String weird;

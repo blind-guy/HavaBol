@@ -36,15 +36,18 @@ public class HavaBol
                     , "tokenStr");
             
             Scanner scan = new Scanner(args[0], symbolTable);
-            while (! scan.getNext().isEmpty())
+           /* while (! scan.getNext().isEmpty())
             {
                 scan.currentToken.printToken();
-            }
+            }*/
+            Parse parser = new Parse(scan);
+            parser.parseStmt();
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
     }
+   
 }
 

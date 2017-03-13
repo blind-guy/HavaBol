@@ -15,6 +15,14 @@ public class Numeric
 	public String stringValue;
 	public int type;
 	
+	// We need to have an empty constructor in parsing with the type set to an invalid
+	// number.
+	public Numeric()
+	{
+		stringValue = "";
+		int type = -1;
+	}
+	
 	public Numeric(String token, int type) throws Exception
 	{
 		stringValue = token;
