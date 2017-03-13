@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+
+//import havabol.Parse.Debug;
+
 public class Scanner
 {
 
@@ -16,6 +19,7 @@ public class Scanner
 	public int iColPos 						= 0;
 	public Token currentToken  				= new Token();
 	public Token nextToken 					= null;
+	public Debug dBug = new Debug();
 	
 	private final static String DELIMITERS = " \t;:()\'\"=!<>+-*/[]#^\n,";
 	private final static String OPERATORS = "<>+-*/=!#^";
@@ -71,6 +75,14 @@ public class Scanner
 		}
 		this.currentToken = copyToken(this.nextToken);
 		this.nextToken = createNextToken();
+		
+		// bShowToken is set to on and the current token will print
+		// i'm thinking we should pass in the Debug class from parse class
+		if(dBug.bShowToken)
+		{
+			currentToken.printToken();
+		}
+		
 		return this.currentToken.tokenStr;
 	}
 	
@@ -511,5 +523,19 @@ public class Scanner
 		}
 		return false;
 	}
+	 public static class Debug{
+
+			// these variables are set to private out of habit 
+			// we can change to public and get rid of the getters and setters
+			public boolean bShowToken;
+			public boolean bShowExpr;
+			public boolean bShowAssign;
+			
+			public Debug(){
+				this.bShowToken = false;
+				this.bShowExpr = false;
+				this.bShowAssign = false;
+			}
+		}
 }
 	

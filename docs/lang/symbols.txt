@@ -23,3 +23,9 @@ or operator -
 not operator -
 in operator -
 notin operator -
+debug debug -
+on debug -
+off debug -
+bShowToken debug -
+bShowExpr debug -
+bShowAssign debug -
