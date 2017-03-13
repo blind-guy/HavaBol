@@ -80,6 +80,25 @@ public class Parse
 		}
 	}
 
+	/**
+	 * This is called to parse declare statements. It matches the first two rules in
+	 * the following part of our formal grammar definition:
+	 * 
+	 * declareStmt		:= 'Token.DECLARE' assignmentStmt
+	 * assignmentStmt 	:= 'Token.IDENTIFIER' assignmentStmt'
+	 * assignmentStmt' 	:= 'Token.OPERATOR' expressionStmt ';'
+	 * 					|  ';'
+	 * 
+	 * and will return after a storage object and symbol table entry are created from
+	 * the Token.DECLARE and Token.IDENTIFIER. assignmentStmt() will handle assignmentStmt'.
+	 * 
+	 * In order for assignmentStm() to be called and parsed correctly this function
+	 * needs to increment the scanner so scan.currentToken is the identifier.
+	 * 
+	 * @return a boolean true if it succeeds or false otherwise
+	 * @throws Exception representing if there is an error in parsing or thrown by the
+	 * scanner
+	 */
 	private boolean declareStmt() throws Exception 
 	{
 		// See if we have a valid variable name to perform the declare
@@ -98,7 +117,7 @@ public class Parse
 		// Create the object we'll use for storage.
 		//
 		// TODO: for now we're using a Numeric for numeric Int and Float values,
-		// booleans for Bool, and StringBuilder for Strings. This does not 
+		// Boolean for Bool, and StringBuilder for Strings. This does not 
 		// handle arrays.
 		Object stObject = null;
 		STIdentifier stEntry = new STIdentifier(scan.nextToken.tokenStr, Token.IDENTIFIER);
@@ -132,9 +151,18 @@ public class Parse
 		storage.put(scan.nextToken.tokenStr, stObject);
 		scan.symbolTable.putSymbol(scan.nextToken.tokenStr, stEntry);
 		scan.getNext();
+		
 		return true;
 	}
 
+	/**
+	 * This is passed an error message and reference objects and throws a corresponding
+	 * ParserException which contains the message, location of the error, and source file
+	 * name.
+	 * @param msg
+	 * @param args
+	 * @throws ParserException
+	 */
 	private void error(String msg, Object...args) throws ParserException
 	{
 		String errorMsg = String.format(msg, args);
