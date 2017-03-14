@@ -73,7 +73,7 @@ public class Scanner
 				System.out.println("  " + (lineNum + 1) + " " + this.sourceLineM.get(lineNum));	
 			}
 		}
-		this.currentToken = copyToken(this.nextToken);
+		this.currentToken = Token.copyToken(this.nextToken);
 		this.nextToken = createNextToken();
 		
 		// bShowToken is set to on and the current token will print
@@ -84,25 +84,6 @@ public class Scanner
 		}
 		
 		return this.currentToken.tokenStr;
-	}
-	
-	/**
-	 * This takes the token passed as a parameter and creates a copy of that token 
-	 * and returns it.
-	 * @param oldToken
-	 * @return
-	 */
-	private Token copyToken(Token oldToken)
-	{
-		Token scRtToken = new Token();
-		
-		scRtToken.tokenStr 		= oldToken.tokenStr;
-		scRtToken.primClassif 	= oldToken.primClassif;
-		scRtToken.subClassif 	= oldToken.subClassif;
-		scRtToken.iColPos		= oldToken.iColPos;
-		scRtToken.iSourceLineNr	= oldToken.iSourceLineNr;
-		
-		return scRtToken;
 	}
 	
 	/**
@@ -476,7 +457,7 @@ public class Scanner
 			// the prime classification.
 			STEntry entry = this.symbolTable.getEntry(token.tokenStr);
 			
-			// If the entry isn't null, then we can modify its sub snad prime classification
+			// If the entry isn't null, then we can modify its sub and prime classification
 			// depending on the type of entry.
 			if(entry != null)
 			{

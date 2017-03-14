@@ -1,10 +1,14 @@
-debug bShowToken on;
+debug bShowToken off;
+debug bShowAssign on;
 Int i;
 Float pi;
+Bool foo;
+foo = F;
 String day;
    day 
    = 
    "Sunday";
+Bool bar = T;
 debug bShowToken off;
 String name;
 name = "Anita Goodgrade";

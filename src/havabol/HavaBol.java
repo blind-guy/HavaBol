@@ -40,6 +40,8 @@ public class HavaBol
             {
                 scan.currentToken.printToken();
             }*/
+            // "Prime" the scanner by making sure the first token is set.
+            scan.getNext();
             Parse parser = new Parse(scan);
             parser.parseStmt();
         }
@@ -48,6 +50,5 @@ public class HavaBol
             e.printStackTrace();
         }
     }
-   
 }
 

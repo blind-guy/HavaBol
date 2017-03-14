@@ -10,15 +10,16 @@ public class Token
     public int subClassif = 0;
     public int iSourceLineNr = 0;
     public int iColPos = 0;
+    
     // Constants for primClassif
-    public static final int OPERAND = 1;    // constants, identifier
-    public static final int OPERATOR = 2;   // + - * / < > = ! 
-    public static final int SEPARATOR = 3;  // ( ) , : ; [ ]
-    public static final int FUNCTION = 4;   // TBD
-    public static final int CONTROL = 5;    // TBD
-    public static final int DEBUG = 6;      // DEBUG statement
-    public static final int EOF = 7;      	// EOF statement
-    public static final int RT_PAREN = 8;   // TBD
+    public static final int OPERAND = 2;    // constants, identifier
+    public static final int OPERATOR = 3;   // + - * / < > = ! 
+    public static final int SEPARATOR = 4;  // ( ) , : ; [ ]
+    public static final int FUNCTION = 5;   // TBD
+    public static final int CONTROL = 6;    // TBD
+    public static final int DEBUG = 7;      // DEBUG statement
+    public static final int EOF = 8;      	// EOF statement
+    public static final int RT_PAREN = 9;   // TBD
     
     // Constants for OPERAND's subClassif
     public static final int IDENTIFIER = 1;
@@ -39,15 +40,16 @@ public class Token
     // array of primClassif string values for the constants
     public static final String[] strPrimClassifM = 
         {"Undefined"
-            , "OPERAND"     // 1
-            , "OPERATOR"    // 2
-            , "SEPARATOR"   // 3
-            , "FUNCTION"    // 4
-            , "CONTROL"     // 5
-            , "DEBUG"       // 6
-            , "EOF"         // 7
+        	, "IDENTIFIER"  // 1
+            , "OPERAND"     // 2
+            , "OPERATOR"    // 3
+            , "SEPARATOR"   // 4
+            , "FUNCTION"    // 5
+            , "CONTROL"     // 6
+            , "DEBUG"       // 7
+            , "EOF"         // 8
         };
-    public static final int PRIM_CLASS_MAX = 7;
+    public static final int PRIM_CLASS_MAX = 8;
     // array of subClassif string values for the constants
     public static final String[] strSubClassifM = 
         {"Undefined"
@@ -114,7 +116,10 @@ public class Token
                     subClassifStr = "USER";
                 else
                     subClassifStr = "**garbage**";
-                break;    
+                break;
+            case Token.IDENTIFIER:
+            	subClassifStr = strSubClassifM[subClassif];
+            	break;	
             default:
                 subClassifStr = "-";
         }
@@ -131,6 +136,25 @@ public class Token
         }
     }
     
+	/**
+	 * This takes the token passed as a parameter and creates a copy of that token 
+	 * and returns it.
+	 * @param oldToken
+	 * @return
+	 */
+	public static Token copyToken(Token oldToken)
+	{
+		Token scRtToken = new Token();
+		
+		scRtToken.tokenStr 		= oldToken.tokenStr;
+		scRtToken.primClassif 	= oldToken.primClassif;
+		scRtToken.subClassif 	= oldToken.subClassif;
+		scRtToken.iColPos		= oldToken.iColPos;
+		scRtToken.iSourceLineNr	= oldToken.iSourceLineNr;
+		
+		return scRtToken;
+	}
+	
     /**
      * Prints a string that may contain non-printable characters as two lines.  
      * <p>
