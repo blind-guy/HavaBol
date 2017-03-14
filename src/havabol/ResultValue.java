@@ -6,7 +6,7 @@ public class ResultValue {
 	public int iDataType;
 	public Object value;
 	//Numeric numValue;
-	boolean isNum;
+	public boolean isNum = false;
 	
 	public ResultValue(){}
 	
@@ -16,8 +16,15 @@ public class ResultValue {
 		value = val;
 		if (type == Token.INTEGER || type == Token.FLOAT)
 		{
+			if(val instanceof Numeric)
+			{
+				value = val;
+			}
+			else
+			{
+				value = new Numeric((String) val, type);
+			}
 			//numValue = new Numeric(val.toString(), type);
-			value = new Numeric((String) val, type);
 			isNum = true;
 		}
 		else
