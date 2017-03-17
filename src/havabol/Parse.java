@@ -1,10 +1,13 @@
 package havabol;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class Parse 
 {
 	private Scanner scan;
+	public static int localScope = 0;
 	
 	// TODO: this should and will be made into a separate class as its functionality is
 	// fleshed out but for now it simply maps keys (strings representing variable names)
@@ -489,7 +492,7 @@ public class Parse
 			// is likely an error because I didn't code the interpreter correctly.
 			error("attempted to make declaration using invalid datatype");
 		}
-		
+		stEntry.nonLocal = localScope;
 		storage.put(scan.nextToken.tokenStr, stObject);
 		scan.symbolTable.putSymbol(scan.nextToken.tokenStr, stEntry);
 		System.out.println("\tSTENTRY CREATED FOR KEY: " + scan.nextToken.tokenStr + "\n\tITS TYPE IS: " + Token.strSubClassifM[stEntry.dclType]);
@@ -562,6 +565,38 @@ public class Parse
 			}
 		}
 		return rStmt;
+	}
+	
+	private void incrementScope()
+	{
+		localScope++;
+	}
+	
+	/**
+	 * This function evaluates symbols in the symbol table, finds those
+	 * which are identifiers which match the current local scope and removes them
+	 * from the symbol table and their corresponding storage objects fromt he storage.
+	 */
+	private void decrementScope()
+	{
+		// Loop through the entries in our symbol table.
+		// Locate all entries that are identifiers and if their local scope matches our
+		// current local scope, we remove their entries from storage and from the 
+		// Symbol Table.
+		for(Entry<String, STEntry> entry : scan.symbolTable.ht.entrySet())
+		{
+			STEntry stEntry = entry.getValue();
+			if(stEntry.primClassif == Token.IDENTIFIER &&
+			   ((STIdentifier) stEntry).nonLocal == localScope)
+			{
+				String key = entry.getKey();
+				storage.remove(key);
+				scan.symbolTable.ht.remove(key);
+			}
+		}
+		
+		// Decrement the scope variable.
+		localScope--;
 	}
 	
 	/*public static class Debug{

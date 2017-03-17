@@ -12,7 +12,7 @@ public class SymbolTable
 	// currently defined.
 	//
 	// TODO: For now this does not handle non-globals which will be implemented later.
-	private HashMap<String, STEntry> ht = new HashMap<String, STEntry>();
+	public HashMap<String, STEntry> ht = new HashMap<String, STEntry>();
 	
 	// A basic constructor which needs only call initGlobal() to put in
 	// all language-defined entries.
