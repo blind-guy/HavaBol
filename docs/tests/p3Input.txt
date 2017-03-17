@@ -20,6 +20,7 @@ loc = "TX";
 // numeric stuff
 print(">>> Checking datatype results based on left operand");
 pi = 3.14;
+pi += 2;
 Float area;
 Float radius2;
 Int radius;

@@ -161,8 +161,6 @@ public class Parse
 		// we should call expression().
 		if(operator.tokenStr.equals("="))
 		{
-			// TODO: this should be what appears here but for now we assume only a single value
-			// is on the right-hand side.
 			res2 = expr();
 			if(res2 == null)
 			{
@@ -172,12 +170,32 @@ public class Parse
 			{
 				res = assign(identifier.tokenStr, res2);
 			}
-			// TODO: there are more assignment operators to handle, specifically the copled
-			// numeric operators.
 		}
-	
-		// TODO: check valid separator after assignment
+		else if(operator.tokenStr.equals("+=") ||
+				operator.tokenStr.equals("-=") ||
+				operator.tokenStr.equals("/=") ||
+				operator.tokenStr.equals("*="))
+		{
+			if(identifier.subClassif == Token.STRING)
+			{
+				error("attempated invalid assignment operator on string");
+			}
+			else
+			{
+				res = getValueOfToken(identifier);
+				res2 = expr();
+				
+				res = res.performOperation(res2, operator.tokenStr.substring(0, 1));
+				res = assign(identifier.tokenStr, res);
+			}
+		}
+		else
+		{
+			// TODO: this needs to be added after we've handled prints
+			// error("attempt invalid assignment operation: " + operator.tokenStr);
+		}
 		
+		// TODO: check valid separator after assignment
 		/**
 		if(scan.currentToken.primClassif != Token.SEPARATOR &&
 		   !scan.currentToken.tokenStr.equals(";"))
@@ -195,6 +213,55 @@ public class Parse
 			System.out.println(res.toString() + " ASSIGNED TO VARIABLE \"" + identifier.tokenStr + "\"");
 		}
 		
+		return res;
+	}
+
+	private ResultValue getValueOfToken(Token identifier) throws Exception
+	{
+		STIdentifier stEntry = null;
+		ResultValue res = null;
+		if(identifier.primClassif == Token.IDENTIFIER)
+		{	
+			stEntry = (STIdentifier) scan.symbolTable.getEntry(identifier.tokenStr);
+			if(stEntry == null)
+			{
+				error("variable is undeclared or undefined in this scope");
+			}
+			res = new ResultValue(identifier.subClassif, storage.get(identifier.tokenStr));
+		}
+		else if(identifier.primClassif == Token.OPERAND)
+		{
+			switch(identifier.subClassif)
+			{
+				case Token.INTEGER:
+					res = new ResultValue(identifier.subClassif, new Numeric(identifier.tokenStr, Token.INTEGER));
+					break;
+				case Token.FLOAT:
+					res = new ResultValue(identifier.subClassif, new Numeric(identifier.tokenStr, Token.FLOAT));
+					break;
+				case Token.BOOLEAN:
+					if(identifier.tokenStr.equals("T"))
+					{
+						res = new ResultValue(identifier.subClassif, new Boolean(true));
+					}
+					else if(identifier.tokenStr.equals("F"))
+					{
+						res = new ResultValue(identifier.subClassif, new Boolean(false));
+					}
+					else
+					{
+						error("token's primClassif is OPERAND and subClassif is BOOLEAN but " +
+							"tokenStr " + identifier.tokenStr + " could not be resolved " +
+							"to a boolean value");
+					}
+					break;
+				case Token.STRING:
+					res = new ResultValue(identifier.subClassif, new StringBuilder(identifier.tokenStr));
+					break;
+				default:
+					error("operand is of unhandled type");
+			}
+		}
 		return res;
 	}
 
@@ -350,7 +417,6 @@ public class Parse
 					error("operand is of unhandled type");
 			}
 		}
-		scan.getNext();
 		return res;
 	}
 
@@ -433,7 +499,6 @@ public class Parse
 		scan.nextToken.primClassif = stEntry.primClassif;
 		scan.nextToken.subClassif = stEntry.dclType;
 		scan.getNext();
-		System.out.println("CURRENT TOKEN WITHIN DECLARESTMT() UPDATED TO: ");
 		scan.currentToken.printToken();
 		return true;
 	}
