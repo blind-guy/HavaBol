@@ -1,3 +1,4 @@
+debug bShowAssign on;
 Int i;
 Float pi;
 String day;

@@ -175,6 +175,17 @@ public class Parse
 			// TODO: there are more assignment operators to handle, specifically the copled
 			// numeric operators.
 		}
+	
+		// TODO: check valid separator after assignment
+		
+		/**
+		if(scan.currentToken.primClassif != Token.SEPARATOR &&
+		   !scan.currentToken.tokenStr.equals(";"))
+		{
+			error("expected separator ';' at end of assignment");
+		}**/
+		
+		scan.getNext();
 		
 		// Print the assignment results if debugging is on.
 		// TODO: res should never be null and should be handled above if we attempt
@@ -282,9 +293,7 @@ public class Parse
 		{
 			scan.getNext();
 		}
-		
-		// Call get next to eat the very last separator.
-		scan.getNext();
+
 		return res;
 	}
 
