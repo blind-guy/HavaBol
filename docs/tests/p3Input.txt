@@ -9,6 +9,9 @@ String day;
    = 
    "Sunday";
 Bool bar = T;
+while bar:
+	bar = F;
+endwhile;
 debug bShowToken off;
 String name;
 name = "Anita Goodgrade";

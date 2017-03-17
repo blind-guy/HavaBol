@@ -20,7 +20,7 @@ public class Parse
 		this.storage = new HashMap<String, Object>();
 	}
 
-	public void parseStmt() throws Exception
+	public void parseStmt(boolean bFlag) throws Exception
 	{
 		// continue until end of file
 		while (this.scan.currentToken.primClassif != Token.EOF)
@@ -38,7 +38,17 @@ public class Parse
 				case Token.CONTROL:
 					if(scan.currentToken.subClassif == Token.DECLARE)
 					{
-						declareStmt();
+						declareStmt(bFlag);
+					}
+					else if(scan.currentToken.subClassif == Token.FLOW &&
+							scan.currentToken.tokenStr.equals("while"))
+					{
+						whileStmt(bFlag);				
+					}
+					else if(scan.currentToken.subClassif == Token.END &&
+							scan.currentToken.tokenStr.equals("endwhile"))
+					{
+						return;
 					}
 					else
 					{
@@ -108,7 +118,7 @@ public class Parse
 					// // this could be valid syntax even though it does nothing
 					if(scan.nextToken.primClassif != Token.SEPARATOR )
 					{
-						assignmentStmt();
+						assignmentStmt(bFlag);
 					}
 					else
 					{
@@ -128,10 +138,11 @@ public class Parse
 	 * This handles assignments and will throw an Exception if a variable is undefined,
 	 * Improperly classified or if the programmer who wrote this function did something
 	 * wrong.
+	 * @param bFlag 
 	 * @return
 	 * @throws Exception
 	 */
-	private ResultValue assignmentStmt() throws Exception
+	private ResultValue assignmentStmt(boolean bFlag) throws Exception
 	{
 		ResultValue res  = null;
 		ResultValue res2 = null;
@@ -171,7 +182,10 @@ public class Parse
 			}
 			else
 			{
-				res = assign(identifier.tokenStr, res2);
+				if(bFlag)
+				{
+					res = assign(identifier.tokenStr, res2);
+				}
 			}
 		}
 		else if(operator.tokenStr.equals("+=") ||
@@ -189,7 +203,10 @@ public class Parse
 				res2 = expr();
 				
 				res = res.performOperation(res2, operator.tokenStr.substring(0, 1));
-				res = assign(identifier.tokenStr, res);
+				if(bFlag)
+				{
+					res = assign(identifier.tokenStr, res);
+				}
 			}
 		}
 		else
@@ -211,7 +228,7 @@ public class Parse
 		// Print the assignment results if debugging is on.
 		// TODO: res should never be null and should be handled above if we attempt
 		// to make such an assignment.
-		if(scan.dBug.bShowAssign == true && res != null)
+		if(bFlag && scan.dBug.bShowAssign == true && res != null)
 		{
 			System.out.println(res.toString() + " ASSIGNED TO VARIABLE \"" + identifier.tokenStr + "\"");
 		}
@@ -437,12 +454,13 @@ public class Parse
 	 * 
 	 * In order for assignmentStm() to be called and parsed correctly this function
 	 * needs to increment the scanner so scan.currentToken is the identifier.
+	 * @param bFlag 
 	 * 
 	 * @return a boolean true if it succeeds or false otherwise
 	 * @throws Exception representing if there is an error in parsing or thrown by the
 	 * scanner
 	 */
-	private boolean declareStmt() throws Exception 
+	private boolean declareStmt(boolean bFlag) throws Exception 
 	{
 		// See if we have a valid variable name to perform the declare
 		// or throw an exception.
@@ -493,9 +511,13 @@ public class Parse
 			error("attempted to make declaration using invalid datatype");
 		}
 		stEntry.nonLocal = localScope;
-		storage.put(scan.nextToken.tokenStr, stObject);
-		scan.symbolTable.putSymbol(scan.nextToken.tokenStr, stEntry);
-		System.out.println("\tSTENTRY CREATED FOR KEY: " + scan.nextToken.tokenStr + "\n\tITS TYPE IS: " + Token.strSubClassifM[stEntry.dclType]);
+		
+		if(bFlag)
+		{
+			storage.put(scan.nextToken.tokenStr, stObject);
+			scan.symbolTable.putSymbol(scan.nextToken.tokenStr, stEntry);
+			System.out.println("\tSTENTRY CREATED FOR KEY: " + scan.nextToken.tokenStr + "\n\tITS TYPE IS: " + Token.strSubClassifM[stEntry.dclType]);
+		}
 		
 		// Set the next token and update its prime and sub-classifications now that we've
 		// identified it (necessary for in-line assignments like: Int foo = 4;)
@@ -599,6 +621,113 @@ public class Parse
 		localScope--;
 	}
 	
+	private void whileStmt(boolean bFlag) throws Exception
+	{
+		Token conditionToken = null;
+		ResultValue conditionResult = null;
+		
+		// Set current to the condition we wish to evaluate.
+		scan.getNext();
+		
+		// Copy the condition Token so we have our position saved and get the result value
+		// for its evaluation.
+		conditionToken  = Token.copyToken(scan.currentToken);
+		conditionResult = expr();
+		
+		// See if we were given a result which is the proper value type.
+		if(conditionResult.iDataType != Token.BOOLEAN)
+		{
+			// TODO: needs to be modified once expressions are properly parsed
+			// error("could not resolve while condition to boolean type");
+			//
+			// For now, it simply loops until we hit the endwhile, checks syntax
+			// and returns. 
+			while(scan.currentToken.primClassif != Token.CONTROL || 
+				  scan.currentToken.subClassif != Token.END ||
+				  !scan.currentToken.tokenStr.equals("endwhile"))
+			{
+				scan.getNext();
+			}
+			if(scan.nextToken.primClassif != Token.SEPARATOR ||
+			   !scan.nextToken.tokenStr.equals(";"))
+			{
+				error("invalid syntax at end of while loop: expected ';' but received '" +
+					scan.nextToken.tokenStr + "'");
+			}
+			else
+			{
+				scan.getNext();
+				scan.getNext();
+				return ;
+			}
+			// EVERYTHING BETWEEN THE ABOVE COMMENT TO THIS LINE SHOULD BE REMOVED WHEN
+			// PROPER EXPRESSION PARSING IS HANDLED
+		}
+		
+		// Check to see if we're on the correct separator for syntax reasons.
+		if(scan.currentToken.primClassif != Token.SEPARATOR && 
+		   !scan.currentToken.tokenStr.equals(":"))
+		{
+			error("invalid syntax in while statement: expected ':' and was given " + scan.currentToken.tokenStr);
+		}
+		else
+		{
+			scan.getNext();
+		}
+		
+		// If we're executing, perform our loop.
+		if(bFlag)
+		{
+			// Loop until our condition is evaluated to false.
+			while(((Boolean) conditionResult.value).booleanValue())
+			{
+				// Increment scope.
+				incrementScope();
+		
+				// Call parseStmt(). This should return here when we find an
+				// endwhile control flow token.
+				parseStmt(bFlag);
+				
+				// Decrement scope which will also handle cleaning up values we don't want to
+				// stay around.
+				decrementScope();
+				
+				// Set our scanner position to the conditional again.
+				scan.setPos(conditionToken);
+				
+				// Reevaluate the conditional and increment the scanner.
+				// We've error checked this before so there's no need to see if
+				// it's still a valid separator.
+				conditionResult = expr();
+				scan.getNext();
+			}
+			// TODO: this needs a proper skipTo()
+			while(scan.currentToken.primClassif != Token.CONTROL && 
+				  scan.currentToken.subClassif != Token.END &&
+				  !scan.currentToken.tokenStr.equals("endwhile"))
+			{
+				scan.getNext();
+			}
+		}
+		else
+		{ 
+			parseStmt(bFlag);
+		}
+		
+		// We've finished executing the loop and need to check to make sure the last
+		// separator is valid for syntax reasons.
+		if(scan.nextToken.primClassif != Token.SEPARATOR ||
+		   !scan.nextToken.tokenStr.equals(";"))
+		{
+			error("invalid syntax at end of while loop: expected ';' but received '" +
+				scan.nextToken.tokenStr + "'");
+		}
+		else
+		{
+			scan.getNext();
+			scan.getNext();
+		}
+	}
 	/*public static class Debug{
 
 		// these variables are set to private out of habit 
