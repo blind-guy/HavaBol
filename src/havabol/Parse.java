@@ -128,11 +128,48 @@ public class Parse
 						scan.getNext();
 					}
 					break;
+				// Check to see if we have an unclassified identifier. It's fair to say this
+				// probably means failure to initialize but we should try to classify it and
+				// let assignmentStmt() handle errors.
+				case Token.OPERAND:
+					if(scan.currentToken.subClassif == Token.IDENTIFIER)
+					{
+						reclassifyCurrentTokenIdentifier();
+						assignmentStmt(bFlag);
+					}
+					else
+					{
+						scan.getNext();
+					}
+					break;
 				default:
 					// TODO: remove once all cases are handled or possibly replace with error
 					// for poorly classified tokens.
 					scan.getNext();
 			}
+		}
+	}
+
+	private void reclassifyCurrentTokenIdentifier() throws ParserException
+	{
+		// Prevent naughty programmers from trying to reclassify tokens they
+		// shouldn't touch.
+		if(scan.currentToken.primClassif != Token.OPERAND && 
+		   scan.currentToken.subClassif  != Token.IDENTIFIER)
+		{
+			error("current token is not an identifier and cannot be classified as such");
+		}
+		
+		STEntry stEntry = null;
+		stEntry = scan.symbolTable.getEntry(scan.currentToken.tokenStr);
+		if(stEntry == null)
+		{
+			error("attempted to perform an operation with an uninitialized variable or undefined symbol");
+		}
+		else
+		{
+			scan.currentToken.primClassif = stEntry.primClassif;
+			scan.currentToken.subClassif = ((STIdentifier) stEntry).dclType;
 		}
 	}
 
@@ -309,6 +346,7 @@ public class Parse
 		{
 			error("attempted to make an assignment to an undeclared variable");
 		}
+
 		
 		// Get the storage object associated with this key.
 		storedObject = storage.get(key);
