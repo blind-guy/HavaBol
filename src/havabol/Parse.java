@@ -433,9 +433,11 @@ public class Parse
 		while(scan.currentToken.primClassif != Token.SEPARATOR)
 		{
 			res = convertCurrentTokenToResultValue();
-			//System.out.println(res.toString() + " primClasif " + scan.currentToken.primClassif);
+			//if (res != null)
+				//System.out.println(res.toString() + " primClasif " + scan.currentToken.primClassif);
 			
-			if (scan.currentToken.primClassif == Token.OPERAND)
+			if (scan.currentToken.primClassif == Token.OPERAND 
+					|| scan.currentToken.primClassif == Token.IDENTIFIER)
 				operandStack.push(res);
 			else if (scan.currentToken.primClassif == Token.OPERATOR)
 				operatorStack.push(scan.currentToken.tokenStr);
@@ -451,9 +453,15 @@ public class Parse
 		//System.out.println("operand size " + operandStack.size() + " operator size " + operatorStack.size());
 
 		if (operandStack.size() == 1 && operatorStack.size() == 1)
+		{
 			res = (operandStack.pop()).performOperation(null, operatorStack.pop());
-		else if (operandStack.size() == 2 && operatorStack.size() == 1)
-			res = (operandStack.pop()).performOperation(operandStack.pop(), operatorStack.pop());
+		}	
+		else if (operandStack.size() == 2 && operatorStack.size() == 1) 
+		{
+			ResultValue rightOp = operandStack.pop();
+			ResultValue leftOp = operandStack.pop();
+			res = leftOp.performOperation(rightOp, operatorStack.pop());
+		}
 		else if (operandStack.size() == 1)
 			res = operandStack.pop();
 		else
@@ -705,7 +713,7 @@ public class Parse
 		//System.out.println("results size " + results.size());
 		
 		for (ResultValue rs : results)
-			System.out.print(rs.value.toString());
+			System.out.print(rs.value.toString().concat(" "));
 		System.out.println();
 		if (scan.currentToken.tokenStr.equals(";"))
 		{
