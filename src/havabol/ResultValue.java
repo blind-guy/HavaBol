@@ -64,49 +64,49 @@ public class ResultValue {
 				else if (operation.equals("=="))
 				{
 					if ( ((Numeric) value).equals((Numeric) rightOperand.value) == true)
-						result = "T";
+						result = new Boolean(true);
 					else
-						result = "F";
+						result = new Boolean(false);
 					resultType = Token.BOOLEAN;
 				}
 				else if (operation.equals("!="))
 				{
 					if ( ((Numeric) value).notequals((Numeric) rightOperand.value) == true)
-						result = "T";
+						result = new Boolean(true);
 					else
-						result = "F";
+						result = new Boolean(false);
 					resultType = Token.BOOLEAN;
 				}
 				else if (operation.equals("<"))
 				{
 					if ( ((Numeric) value).lessthan((Numeric) rightOperand.value) == true)
-						result = "T";
+						result = new Boolean(true);
 					else
-						result = "F";
+						result = new Boolean(false);
 					resultType = Token.BOOLEAN;
 				}
 				else if (operation.equals("<="))
 				{
 					if ( ((Numeric) value).lessthanequalto((Numeric) rightOperand.value) == true)
-						result = "T";
+						result = new Boolean(true);
 					else
-						result = "F";
+						result = new Boolean(false);
 					resultType = Token.BOOLEAN;
 				}
 				else if (operation.equals(">"))
 				{
 					if ( ((Numeric) value).greaterthan((Numeric) rightOperand.value) == true)
-						result = "T";
+						result = new Boolean(true);
 					else
-						result = "F";
+						result = new Boolean(false);
 					resultType = Token.BOOLEAN;
 				}
 				else if (operation.equals(">="))
 				{
 					if ( ((Numeric) value).greaterthanequalto((Numeric) rightOperand.value) == true)
-						result = "T";
+						result = new Boolean(true);
 					else
-						result = "F";
+						result = new Boolean(false);
 					resultType = Token.BOOLEAN;
 				}
 				else
@@ -128,49 +128,49 @@ public class ResultValue {
 				else if (operation.equals("=="))
 				{
 					if ( ((Numeric) value).equals(tempRightOperand) == true)
-						result = "T";
+						result = new Boolean(true);
 					else
-						result = "F";
+						result = new Boolean(false);
 					resultType = Token.BOOLEAN;
 				}
 				else if (operation.equals("!="))
 				{
 					if ( ((Numeric) value).notequals(tempRightOperand) == true)
-						result = "T";
+						result = new Boolean(true);
 					else
-						result = "F";
+						result = new Boolean(false);
 					resultType = Token.BOOLEAN;
 				}
 				else if (operation.equals("<"))
 				{
 					if ( ((Numeric) value).lessthan(tempRightOperand) == true)
-						result = "T";
+						result = new Boolean(true);
 					else
-						result = "F";
+						result = new Boolean(false);
 					resultType = Token.BOOLEAN;
 				}
 				else if (operation.equals("<="))
 				{
 					if ( ((Numeric) value).lessthanequalto(tempRightOperand) == true)
-						result = "T";
+						result = new Boolean(true);
 					else
-						result = "F";
+						result = new Boolean(false);
 					resultType = Token.BOOLEAN;
 				}
 				else if (operation.equals(">"))
 				{
 					if ( ((Numeric) value).greaterthan(tempRightOperand) == true)
-						result = "T";
+						result = new Boolean(true);
 					else
-						result = "F";
+						result = new Boolean(false);
 					resultType = Token.BOOLEAN;
 				}
 				else if (operation.equals(">="))
 				{
 					if ( ((Numeric) value).greaterthanequalto(tempRightOperand) == true)
-						result = "T";
+						result = new Boolean(true);
 					else
-						result = "F";
+						result = new Boolean(false);
 					resultType = Token.BOOLEAN;
 				}
 				else
@@ -188,10 +188,10 @@ public class ResultValue {
 			{
 				if (operation.equals("not"))
 				{
-					if (value.equals("T"))
-						result = "F";
-					else if (value.equals("F"))
-						result = "T";
+					if (value.equals(true))
+						result = new Boolean(false);
+					else if (value.equals(false))
+						result = new Boolean(true);
 					else
 						throw new ImproperOperationException("Operand's datatype is inappropriate for " 
 								+ operation + " operations");
@@ -202,7 +202,7 @@ public class ResultValue {
 			else if (rightOperand.iDataType == Token.BOOLEAN)
 			{
 				result = performBooleanOperation(rightOperand, operation);
-				if (result.equals(""))
+				if (result == null)
 					throw new ImproperOperationException("Operand's datatype is inappropriate for " 
 							+ operation + " operations");
 			}
@@ -229,49 +229,49 @@ public class ResultValue {
 			else if (operation.equals("=="))
 			{
 				if (((String) value).equals(rightOperStr))
-					result = "T";
+					result = new Boolean(true);
 				else
-					result = "F";
+					result = new Boolean(false);
 				resultType = Token.BOOLEAN;
 			}
 			else if (operation.equals("!="))
 			{
 				if (!((String) value).equals(rightOperStr))
-					result = "T";
+					result = new Boolean(true);
 				else
-					result = "F";
+					result = new Boolean(false);
 				resultType = Token.BOOLEAN;
 			}
 			else if (operation.equals("<"))
 			{
 				if (((String) value).compareTo(rightOperStr) < 0)
-					result = "T";
+					result = new Boolean(true);
 				else
-					result = "F";
+					result = new Boolean(false);
 				resultType = Token.BOOLEAN;
 			}
 			else if (operation.equals("<="))
 			{
 				if (((String) value).compareTo(rightOperStr) <= 0)
-					result = "T";
+					result = new Boolean(true);
 				else
-					result = "F";
+					result = new Boolean(false);
 				resultType = Token.BOOLEAN;
 			}
 			else if (operation.equals(">"))
 			{
 				if (((String) value).compareTo(rightOperStr) > 0)
-					result = "T";
+					result = new Boolean(true);
 				else
-					result = "F";
+					result = new Boolean(false);
 				resultType = Token.BOOLEAN;
 			}
 			else if (operation.equals(">="))
 			{
 				if (((String) value).compareTo(rightOperStr) >= 0)
-					result = "T";
+					result = new Boolean(true);
 				else
-					result = "F";
+					result = new Boolean(false);
 				resultType = Token.BOOLEAN;
 			}
 			else
@@ -286,47 +286,48 @@ public class ResultValue {
 		return new ResultValue(resultType, result);
 	}
 	
-	public String performBooleanOperation(ResultValue rightOperand, String operation)
+	public Object performBooleanOperation(ResultValue rightOperand, String operation)
 	{
-		boolean leftOper, rightOper;
-		if (value.equals("T"))
-			leftOper = true;
-		else
-			leftOper = false;
-		if (rightOperand.value.equals("T"))
-			rightOper = true;
-		else
-			rightOper = false;
+//		boolean leftOper, rightOper;
+//		if (value.equals("T"))
+//			leftOper = true;
+//		else
+//			leftOper = false;
+//		if (rightOperand.value.equals("T"))
+//			rightOper = true;
+//		else
+//			rightOper = false;
+		
 		if (operation.equals("and"))
 		{
-			if (leftOper && rightOper)
-				return "T";
+			if ((Boolean) value && (Boolean) rightOperand.value)
+				return new Boolean(true);
 			else
-				return "F";
+				return new Boolean(false);
 		}
 		else if (operation.equals("or"))
 		{
-			if (leftOper || rightOper)
-				return "T";
+			if ((Boolean) value || (Boolean) rightOperand.value)
+				return new Boolean(true);
 			else
-				return "F";
+				return new Boolean(false);
 		}
 		else if (operation.equals("=="))
 		{
-			if (leftOper == rightOper)
-				return "T";
+			if (value.equals(rightOperand.value))
+				return new Boolean(true);
 			else
-				return "F";
+				return new Boolean(false);
 		}
 		else if (operation.equals("!="))
 		{
-			if (leftOper == rightOper)
-				return "T";
+			if (!value.equals(rightOperand.value))
+				return new Boolean(true);
 			else
-				return "F";
+				return new Boolean(false);
 		}
 		else
-			return "";
+			return null;
 	}
 	
 	@Override

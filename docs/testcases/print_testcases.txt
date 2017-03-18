@@ -1,0 +1,14 @@
+print("have a\t ball\n");
+print(1+1, 2, 3);
+print(T and F);
+
+RESULT:
+
+primClassif subClassif   tokenStr
+  1 print("have a\t ball\n");
+have a	 ball
+
+  2 print(1+1, 2, 3);
+223
+  3 print(T and F);
+false

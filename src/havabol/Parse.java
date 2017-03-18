@@ -1,6 +1,8 @@
 package havabol;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Stack;
 
 public class Parse 
 {
@@ -87,6 +89,14 @@ public class Parse
 							this.scan.nextToken.iSourceLineNr + " at column " + this.scan.nextToken.iColPos +
 							" is formatted incorrectly; format: Debug <type> <on/off>");
 					}
+					break;
+				case Token.FUNCTION:
+					if (this.scan.currentToken.tokenStr.equals("print")) 
+					{
+						callBuiltInFunction("print");
+					}
+					
+					scan.getNext(); // at present, not handling case of other functions	
 					break;
 				// TODO: for now we assume any IDENTIFIER at the beginning of a statement
 				// means we are doing an assignment.
@@ -276,15 +286,44 @@ public class Parse
 		// res to the first thing it sees if it's viable then loops until it hits a separator.
 		//
 		// GOOD LUCK NICK
-		ResultValue res;
-		res = convertCurrentTokenToResultValue();
+		ResultValue res = null;
+		
+		Stack<ResultValue> operandStack = new Stack<ResultValue>();
+		Stack<String> operatorStack = new Stack<String>();
+//		if (scan.currentToken.primClassif == Token.SEPARATOR)
+//			scan.getNext();
+		
 		while(scan.currentToken.primClassif != Token.SEPARATOR)
 		{
+			res = convertCurrentTokenToResultValue();
+			//System.out.println(res.toString() + " primClasif " + scan.currentToken.primClassif);
+			
+			if (scan.currentToken.primClassif == Token.OPERAND)
+				operandStack.push(res);
+			else if (scan.currentToken.primClassif == Token.OPERATOR)
+				operatorStack.push(scan.currentToken.tokenStr);
+			else if (scan.currentToken.primClassif == Token.FUNCTION)
+			{
+				ResultValue temp = callBuiltInFunction(scan.currentToken.tokenStr);
+				if (temp != null)
+					operandStack.push(temp);
+			}
 			scan.getNext();
 		}
 		
+		//System.out.println("operand size " + operandStack.size() + " operator size " + operatorStack.size());
+
+		if (operandStack.size() == 1 && operatorStack.size() == 1)
+			res = (operandStack.pop()).performOperation(null, operatorStack.pop());
+		else if (operandStack.size() == 2 && operatorStack.size() == 1)
+			res = (operandStack.pop()).performOperation(operandStack.pop(), operatorStack.pop());
+		else if (operandStack.size() == 1)
+			res = operandStack.pop();
+		else
+			error("Improper expression");
+		
 		// Call get next to eat the very last separator.
-		scan.getNext();
+		//scan.getNext();
 		return res;
 	}
 
@@ -341,7 +380,7 @@ public class Parse
 					error("operand is of unhandled type");
 			}
 		}
-		scan.getNext();
+		//scan.getNext();
 		return res;
 	}
 
@@ -488,6 +527,50 @@ public class Parse
 			}
 		}
 		return rStmt;
+	}
+	
+	private ResultValue callBuiltInFunction(String func) throws Exception
+	{
+		if (func.equals("print"))
+		{
+			print();
+			return null;
+		}
+		
+		return new ResultValue();
+	}
+	
+	private void print() throws Exception
+	{
+		scan.getNext();
+		int parenthesisCounter = 0;
+		if (!scan.currentToken.tokenStr.equals("("))
+			error("Missing left parenthesis for print function");
+		parenthesisCounter++;
+		ArrayList<ResultValue> results = new ArrayList<ResultValue>();
+		scan.getNext();
+		
+		while (parenthesisCounter > 0)
+		{
+			//System.out.println("loop " + scan.currentToken.tokenStr);
+			results.add(expr());
+			if (scan.currentToken.tokenStr.equals(")"))
+				parenthesisCounter--;
+			else if (scan.currentToken.tokenStr.equals("("))
+				parenthesisCounter++;
+			scan.getNext();
+		}
+		//System.out.println("results size " + results.size());
+		
+		for (ResultValue rs : results)
+			System.out.print(rs.value.toString());
+		System.out.println();
+		if (scan.currentToken.tokenStr.equals(";"))
+		{
+			scan.getNext();
+		}
+		else
+			error("No semicolon at the end of this line");
 	}
 	
 	/*public static class Debug{

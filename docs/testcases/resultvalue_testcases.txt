@@ -340,3 +340,20 @@ RESULT:
 
 STRING T <= BOOLEAN T = BOOLEAN T
 
+ResultValue anInt3 = new ResultValue(Token.BOOLEAN, true);
+ResultValue anInt4 = new ResultValue(Token.BOOLEAN, true);
+ResultValue res2 = anInt3.performOperation(anInt4, "and");
+System.out.println(anInt3 + " and " + anInt4 + " = " + res2);
+
+RESULT:
+
+BOOLEAN true and BOOLEAN true = BOOLEAN true
+
+ResultValue anInt1 = new ResultValue(Token.STRING, "1");
+ResultValue anInt2 = new ResultValue(Token.INTEGER, "1");
+ResultValue res = anInt1.performOperation(anInt2, "!=");
+System.out.println(anInt1 + " != " + anInt2 + " = " + res);
+
+RESULT:
+
+STRING 1 != INTEGER 1 = BOOLEAN false
