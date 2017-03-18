@@ -1,4 +1,4 @@
-debug bShowToken off;
+debug bShowToken on;
 debug bShowAssign on;
 Int i;
 Float pi;
@@ -9,6 +9,12 @@ String day;
    = 
    "Sunday";
 Bool bar = T;
+Bool bat = F;
+while bar:
+	bat = T;
+	bar = F;
+endwhile;
+bat = F;
 debug bShowToken off;
 String name;
 name = "Anita Goodgrade";
@@ -20,6 +26,7 @@ loc = "TX";
 // numeric stuff
 print(">>> Checking datatype results based on left operand");
 pi = 3.14;
+pi += 2;
 Float area;
 Float radius2;
 Int radius;
