@@ -10,8 +10,10 @@ String day;
    "Sunday";
 Bool bar = T;
 while bar:
+	Bool bat = T;
 	bar = F;
 endwhile;
+bat = F;
 debug bShowToken off;
 String name;
 name = "Anita Goodgrade";

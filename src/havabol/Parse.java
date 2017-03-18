@@ -1,6 +1,8 @@
 package havabol;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -601,20 +603,27 @@ public class Parse
 	 */
 	private void decrementScope()
 	{
+		ArrayList<String> keys = new ArrayList<String>();
+		
 		// Loop through the entries in our symbol table.
 		// Locate all entries that are identifiers and if their local scope matches our
 		// current local scope, we remove their entries from storage and from the 
 		// Symbol Table.
-		for(Entry<String, STEntry> entry : scan.symbolTable.ht.entrySet())
+		Iterator<Entry<String, STEntry>> it = scan.symbolTable.ht.entrySet().iterator();
+		while(it.hasNext())
 		{
+			Entry<String, STEntry> entry = it.next();
 			STEntry stEntry = entry.getValue();
 			if(stEntry.primClassif == Token.IDENTIFIER &&
 			   ((STIdentifier) stEntry).nonLocal == localScope)
 			{
-				String key = entry.getKey();
-				storage.remove(key);
-				scan.symbolTable.ht.remove(key);
+				keys.add(entry.getKey());
 			}
+		}
+		for(String key: keys)
+		{
+			storage.remove(key);
+			scan.symbolTable.ht.remove(key);
 		}
 		
 		// Decrement the scope variable.
@@ -665,7 +674,7 @@ public class Parse
 		}
 		
 		// Check to see if we're on the correct separator for syntax reasons.
-		if(scan.currentToken.primClassif != Token.SEPARATOR && 
+		if(scan.currentToken.primClassif != Token.SEPARATOR || 
 		   !scan.currentToken.tokenStr.equals(":"))
 		{
 			error("invalid syntax in while statement: expected ':' and was given " + scan.currentToken.tokenStr);
@@ -702,8 +711,8 @@ public class Parse
 				scan.getNext();
 			}
 			// TODO: this needs a proper skipTo()
-			while(scan.currentToken.primClassif != Token.CONTROL && 
-				  scan.currentToken.subClassif != Token.END &&
+			while(scan.currentToken.primClassif != Token.CONTROL || 
+				  scan.currentToken.subClassif != Token.END ||
 				  !scan.currentToken.tokenStr.equals("endwhile"))
 			{
 				scan.getNext();
