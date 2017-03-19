@@ -109,8 +109,10 @@ public class Parse
 					{
 						callBuiltInFunction("print");
 					}
-					
-					scan.getNext(); // at present, not handling case of other functions	
+					else
+					{
+						scan.getNext(); // at present, not handling case of other functions	
+					}
 					break;
 				// TODO: for now we assume any IDENTIFIER at the beginning of a statement
 				// means we are doing an assignment.
@@ -129,6 +131,7 @@ public class Parse
 					// // this could be valid syntax even though it does nothing
 					if(scan.nextToken.primClassif != Token.SEPARATOR )
 					{
+						System.out.println("FOUND TOKEN FOR ASSIGNMENT");
 						assignmentStmt(bFlag);
 					}
 					else

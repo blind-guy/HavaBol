@@ -1,4 +1,3 @@
-debug bShowToken on;
 debug bShowAssign on;
 Int i;
 Float pi;
@@ -9,13 +8,15 @@ String day;
    = 
    "Sunday";
 Bool bar = T;
-Bool bat = F;
-while bar:
-	bat = T;
-	bar = F;
+Int count = 0;
+while count < 10:
+	count += 1;
+	if count < 10:
+		print("COUNT =", count, "STILL LOOPING");
+	else:
+		print("COUNT =", count, "NO MORE LOOPS");
+	endif;
 endwhile;
-bat = F;
-debug bShowToken off;
 String name;
 name = "Anita Goodgrade";
 String weird;
@@ -26,6 +27,7 @@ loc = "TX";
 // numeric stuff
 print(">>> Checking datatype results based on left operand");
 pi = 3.14;
+print(pi);
 pi += 2;
 Float area;
 Float radius2;
