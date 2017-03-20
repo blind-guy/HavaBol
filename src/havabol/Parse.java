@@ -645,7 +645,9 @@ public class Parse
 			}
 			// if the condition evaluated to true
 			if (((Boolean)resCond.value).booleanValue()){
+				incrementScope();
 				resCond = parseStmt(true);
+				decrementScope();
 				// if there is an else statement
 				if(resCond.terminatingStr.equals("else")){
 					if(! scan.getNext().equals(":")){
@@ -677,7 +679,9 @@ public class Parse
 						
 					}
 					// the else is executed because if condition was false
+					incrementScope();
 					resCond = parseStmt(true);
+					decrementScope();
 					if (! resCond.terminatingStr.equals("endif")){
 						error("expected endif");
 					}
@@ -819,7 +823,7 @@ public class Parse
 		}
 		else
 		{
-			throw new ParserException(this.scan.nextToken.iSourceLineNr,
+			throw new ParserException(this.scan.currentToken.iSourceLineNr,
 					"PARSER ERROR: token at column " + this.scan.nextToken.iColPos +
 					" expected ';' at the end of a debug statement", "file name");
 		}
