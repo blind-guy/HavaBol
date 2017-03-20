@@ -1,4 +1,5 @@
 debug bShowAssign on;
+debug bShowExpr on;
 Int i;
 Float pi;
 Bool foo;
@@ -90,6 +91,7 @@ print("\tDone with first if");
 
 print(">>> Second If");
 // if then else
+print("i =", i);
 if i >= 5:
     print("\t2nd if true, i >= 5, i =", i);
 else:

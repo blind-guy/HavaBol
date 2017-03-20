@@ -216,7 +216,7 @@ public class ResultValue {
 			String rightOperStr = "";
 			
 			if (rightOperand.iDataType == Token.STRING)
-				rightOperStr = (String) rightOperand.value;
+				rightOperStr = ((StringBuilder) rightOperand.value).toString();
 			else if (rightOperand.iDataType == Token.BOOLEAN)
 				rightOperStr = (String) rightOperand.value;
 			else if (rightOperand.isNum)
@@ -229,7 +229,7 @@ public class ResultValue {
 				result = ((String) value).concat(rightOperStr);
 			else if (operation.equals("=="))
 			{
-				if (((String) value).equals(rightOperStr))
+				if (((StringBuilder) value).toString().equals(rightOperStr))
 					result = new Boolean(true);
 				else
 					result = new Boolean(false);
@@ -237,7 +237,7 @@ public class ResultValue {
 			}
 			else if (operation.equals("!="))
 			{
-				if (!((String) value).equals(rightOperStr))
+				if (!((StringBuilder) value).toString().equals(rightOperStr))
 					result = new Boolean(true);
 				else
 					result = new Boolean(false);

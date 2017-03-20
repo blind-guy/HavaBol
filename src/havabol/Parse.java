@@ -59,6 +59,14 @@ public class Parse
 					{
 						whileStmt(bFlag);				
 					}
+					// in the case of an if statement we call ifStmt
+					else if(scan.currentToken.subClassif == Token.FLOW &&
+							scan.currentToken.tokenStr.equals("if"))
+					{
+						// make sure the next token is the conditional statement for the if statement
+						scan.getNext();
+						ifStmt(bFlag);								
+					}
 					else if(scan.currentToken.subClassif == Token.END &&
 							scan.currentToken.tokenStr.equals("endwhile"))
 					{
@@ -67,37 +75,19 @@ public class Parse
 						returnVal.iDataType = Token.END;
 						return returnVal;
 					}
-					// if we have a flow control statement
-					if(scan.currentToken.subClassif == Token.FLOW)
+					// if the token is an endif, we will return the endif
+					else if(scan.currentToken.subClassif == Token.END &&
+						   (scan.currentToken.tokenStr.equals("endif") || scan.currentToken.tokenStr.equals("else")))
 					{
-						// in the case of an if statement we call ifStmt
-						if(scan.currentToken.tokenStr.equals("if"))
-						{
-							// make sure the next token is the conditional statement for the if statement
-							scan.getNext();
-							ifStmt(bFlag);
-							break;
-													
-						}
-					}
-					// if we have an end control statement
-					if(scan.currentToken.subClassif == Token.END)
-					{
-						// if the token is an endif, we will return the endif
-						if(scan.currentToken.tokenStr.equals("endif") || scan.currentToken.tokenStr.equals("else")){
+						// i wanted to set returnVal and use a break here but the  
+						// switch nested in a while forced me to return from here
 							
-							// i wanted to set returnVal and use a break here but the  
-							// switch nested in a while forced me to return from here
-							
-							returnVal.terminatingStr = scan.currentToken.tokenStr;
-							returnVal.value = scan.currentToken;
-							returnVal.iDataType = Token.END;
-							return returnVal; 
-						}
-						
+						returnVal.terminatingStr = scan.currentToken.tokenStr;
+						returnVal.value = scan.currentToken;
+						returnVal.iDataType = Token.END;
+						return returnVal; 
 					}
-					//else
-					if(true)
+					else
 					{
 						// TODO: remove once all control cases are handled
 						scan.getNext();
@@ -483,6 +473,10 @@ public class Parse
 		// Call get next to eat the very last separator.
 		//scan.getNext();
 
+		if(scan.dBug.bShowExpr)
+		{
+			System.out.println("EVALUATION OF EXPRESSION RETURNED: \n\t" + res);
+		}
 		return res;
 	}
 
