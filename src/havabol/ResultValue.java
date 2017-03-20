@@ -7,6 +7,7 @@ public class ResultValue {
 	public Object value;
 	//Numeric numValue;
 	public boolean isNum = false;
+	public String terminatingStr;
 	
 	public ResultValue(){}
 	

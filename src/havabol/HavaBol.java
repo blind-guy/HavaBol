@@ -43,7 +43,7 @@ public class HavaBol
             // "Prime" the scanner by making sure the first token is set.
             scan.getNext();
             Parse parser = new Parse(scan);
-            parser.parseStmt();
+            parser.parseStmt(true);
         }
         catch (Exception e)
         {
