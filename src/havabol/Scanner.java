@@ -504,19 +504,30 @@ public class Scanner
 		}
 		return false;
 	}
-	 public static class Debug{
+	 public static class Debug
+	 {
 
-			// these variables are set to private out of habit 
-			// we can change to public and get rid of the getters and setters
-			public boolean bShowToken;
-			public boolean bShowExpr;
-			public boolean bShowAssign;
+		// these variables are set to private out of habit 
+		// we can change to public and get rid of the getters and setters
+		public boolean bShowToken;
+		public boolean bShowExpr;
+		public boolean bShowAssign;
 			
-			public Debug(){
-				this.bShowToken = false;
-				this.bShowExpr = false;
-				this.bShowAssign = false;
-			}
+		public Debug()
+		{
+			this.bShowToken = false;
+			this.bShowExpr = false;
+			this.bShowAssign = false;
 		}
+	}
+	 
+	public void setPos(Token conditionToken) throws ScannerTokenFormatException
+	{
+		this.iColPos = conditionToken.iColPos;
+		this.iSourceLineR = conditionToken.iSourceLineNr;
+		this.setTextCharM();
+		this.getNext();
+		this.getNext();
+	}
 }
 	
