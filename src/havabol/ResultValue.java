@@ -27,9 +27,28 @@ public class ResultValue {
 			//numValue = new Numeric(val.toString(), type);
 			isNum = true;
 		}
+		else if (type == Token.IDENTIFIER) 
+		{
+			if (val instanceof Numeric)
+			{
+				value = val;
+				type = ((Numeric) val).type;
+			}
+			else if (val instanceof String)
+			{
+				value = val;
+				type = Token.STRING;
+			}
+			else if (val instanceof Boolean)
+			{
+				value = val;
+				type = Token.BOOLEAN;
+			}
+			else
+				throw new NotANumberException("Not a recognized datatype");
+		}
 		else
 		{
-			//numValue = null;
 			isNum = false;
 		}
 		

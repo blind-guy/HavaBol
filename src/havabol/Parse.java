@@ -433,8 +433,8 @@ public class Parse
 		while(scan.currentToken.primClassif != Token.SEPARATOR)
 		{
 			res = convertCurrentTokenToResultValue();
-			//if (res != null)
-				//System.out.println(res.toString() + " primClasif " + scan.currentToken.primClassif);
+			if (res != null)
+				System.out.println(res.toString() + " primClasif " + scan.currentToken.primClassif);
 			
 			if (scan.currentToken.primClassif == Token.OPERAND 
 					|| scan.currentToken.primClassif == Token.IDENTIFIER)
@@ -450,7 +450,7 @@ public class Parse
 			scan.getNext();
 		}
 		
-		//System.out.println("operand size " + operandStack.size() + " operator size " + operatorStack.size());
+		System.out.println("operand size " + operandStack.size() + " operator size " + operatorStack.size());
 
 		if (operandStack.size() == 1 && operatorStack.size() == 1)
 		{
@@ -491,6 +491,7 @@ public class Parse
 				error("variable is undeclared or undefined in this scope");
 			}
 			res = new ResultValue(scan.currentToken.subClassif, storage.get(scan.currentToken.tokenStr));
+			//res = new ResultValue(identifier.dclType, storage.get(scan.currentToken.tokenStr));
 		}
 		else if(scan.currentToken.primClassif == Token.OPERAND)
 		{
