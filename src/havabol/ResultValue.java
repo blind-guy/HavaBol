@@ -226,7 +226,7 @@ public class ResultValue {
 						+ operation + " operations");
 			
 			if (operation.equals("#"))
-				result = ((String) value).concat(rightOperStr);
+				result = new StringBuilder(((StringBuilder) value).toString().concat(rightOperStr));
 			else if (operation.equals("=="))
 			{
 				if (((StringBuilder) value).toString().equals(rightOperStr))
@@ -245,7 +245,7 @@ public class ResultValue {
 			}
 			else if (operation.equals("<"))
 			{
-				if (((String) value).compareTo(rightOperStr) < 0)
+				if (((StringBuilder) value).toString().compareTo(rightOperStr) < 0)
 					result = new Boolean(true);
 				else
 					result = new Boolean(false);
@@ -253,7 +253,7 @@ public class ResultValue {
 			}
 			else if (operation.equals("<="))
 			{
-				if (((String) value).compareTo(rightOperStr) <= 0)
+				if (((StringBuilder) value).toString().compareTo(rightOperStr) <= 0)
 					result = new Boolean(true);
 				else
 					result = new Boolean(false);
@@ -261,7 +261,7 @@ public class ResultValue {
 			}
 			else if (operation.equals(">"))
 			{
-				if (((String) value).compareTo(rightOperStr) > 0)
+				if (((StringBuilder) value).toString().compareTo(rightOperStr) > 0)
 					result = new Boolean(true);
 				else
 					result = new Boolean(false);
@@ -269,7 +269,7 @@ public class ResultValue {
 			}
 			else if (operation.equals(">="))
 			{
-				if (((String) value).compareTo(rightOperStr) >= 0)
+				if (((StringBuilder) value).toString().compareTo(rightOperStr) >= 0)
 					result = new Boolean(true);
 				else
 					result = new Boolean(false);
