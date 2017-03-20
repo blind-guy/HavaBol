@@ -7,6 +7,7 @@ public class ResultValue {
 	public Object value;
 	//Numeric numValue;
 	public boolean isNum = false;
+	public String terminatingStr;
 	
 	public ResultValue(){}
 	
@@ -234,7 +235,7 @@ public class ResultValue {
 			String rightOperStr = "";
 			
 			if (rightOperand.iDataType == Token.STRING)
-				rightOperStr = (String) rightOperand.value;
+				rightOperStr = ((StringBuilder) rightOperand.value).toString();
 			else if (rightOperand.iDataType == Token.BOOLEAN)
 				rightOperStr = (String) rightOperand.value;
 			else if (rightOperand.isNum)
@@ -244,10 +245,10 @@ public class ResultValue {
 						+ operation + " operations");
 			
 			if (operation.equals("#"))
-				result = ((String) value).concat(rightOperStr);
+				result = new StringBuilder(((StringBuilder) value).toString().concat(rightOperStr));
 			else if (operation.equals("=="))
 			{
-				if (((String) value).equals(rightOperStr))
+				if (((StringBuilder) value).toString().equals(rightOperStr))
 					result = new Boolean(true);
 				else
 					result = new Boolean(false);
@@ -255,7 +256,7 @@ public class ResultValue {
 			}
 			else if (operation.equals("!="))
 			{
-				if (!((String) value).equals(rightOperStr))
+				if (!((StringBuilder) value).toString().equals(rightOperStr))
 					result = new Boolean(true);
 				else
 					result = new Boolean(false);
@@ -263,7 +264,7 @@ public class ResultValue {
 			}
 			else if (operation.equals("<"))
 			{
-				if (((String) value).compareTo(rightOperStr) < 0)
+				if (((StringBuilder) value).toString().compareTo(rightOperStr) < 0)
 					result = new Boolean(true);
 				else
 					result = new Boolean(false);
@@ -271,7 +272,7 @@ public class ResultValue {
 			}
 			else if (operation.equals("<="))
 			{
-				if (((String) value).compareTo(rightOperStr) <= 0)
+				if (((StringBuilder) value).toString().compareTo(rightOperStr) <= 0)
 					result = new Boolean(true);
 				else
 					result = new Boolean(false);
@@ -279,7 +280,7 @@ public class ResultValue {
 			}
 			else if (operation.equals(">"))
 			{
-				if (((String) value).compareTo(rightOperStr) > 0)
+				if (((StringBuilder) value).toString().compareTo(rightOperStr) > 0)
 					result = new Boolean(true);
 				else
 					result = new Boolean(false);
@@ -287,7 +288,7 @@ public class ResultValue {
 			}
 			else if (operation.equals(">="))
 			{
-				if (((String) value).compareTo(rightOperStr) >= 0)
+				if (((StringBuilder) value).toString().compareTo(rightOperStr) >= 0)
 					result = new Boolean(true);
 				else
 					result = new Boolean(false);

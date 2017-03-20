@@ -1,21 +1,35 @@
-debug bShowToken on;
 debug bShowAssign on;
+debug bShowExpr on;
+Bool foo = F;
+if F:
+	print("foo is true!");
+else:
+	print("foo is false!");
+endif;
 Int i;
+i = 3;
+if i == 3:
+	print("I is three!");
+else:
+	print("I is not three!");
+	i += 3;
+endif;
+print("I is now ", i);
 Float pi;
-Bool foo;
-foo = F;
 String day;
    day 
    = 
    "Sunday";
 Bool bar = T;
-Bool bat = F;
-while bar:
-	bat = T;
-	bar = F;
+Int count = 0;
+while count < 10:
+	count += 1;
+	if count < 10:
+		print("COUNT =", count, "STILL LOOPING");
+	else:
+		print("COUNT =", count, "NO MORE LOOPS");
+	endif;
 endwhile;
-bat = F;
-debug bShowToken off;
 String name;
 name = "Anita Goodgrade";
 String weird;
@@ -26,6 +40,7 @@ loc = "TX";
 // numeric stuff
 print(">>> Checking datatype results based on left operand");
 pi = 3.14;
+print(pi);
 pi += 2;
 Float area;
 Float radius2;
@@ -88,6 +103,7 @@ print("\tDone with first if");
 
 print(">>> Second If");
 // if then else
+print("i =", i);
 if i >= 5:
     print("\t2nd if true, i >= 5, i =", i);
 else:

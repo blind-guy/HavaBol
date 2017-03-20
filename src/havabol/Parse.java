@@ -23,8 +23,19 @@ public class Parse
 		this.storage = new HashMap<String, Object>();
 	}
 
-	public void parseStmt(boolean bFlag) throws Exception
+
+	/**
+	 * this is the parser for statements. bExecute will determine whether we execute or not
+	 * returnVal will be used to return. this is used to accomplish recursive descent
+	 * @param bExecute
+	 * @return returnVal
+	 * @throws Exception
+	 */
+
+	public ResultValue parseStmt(boolean bFlag) throws Exception
+
 	{
+		ResultValue returnVal = new ResultValue();
 		// continue until end of file
 		while (this.scan.currentToken.primClassif != Token.EOF)
 		{
@@ -48,10 +59,33 @@ public class Parse
 					{
 						whileStmt(bFlag);				
 					}
+					// in the case of an if statement we call ifStmt
+					else if(scan.currentToken.subClassif == Token.FLOW &&
+							scan.currentToken.tokenStr.equals("if"))
+					{
+						// make sure the next token is the conditional statement for the if statement
+						scan.getNext();
+						ifStmt(bFlag);								
+					}
 					else if(scan.currentToken.subClassif == Token.END &&
 							scan.currentToken.tokenStr.equals("endwhile"))
 					{
-						return;
+						returnVal.terminatingStr = scan.currentToken.tokenStr;
+						returnVal.value = scan.currentToken;
+						returnVal.iDataType = Token.END;
+						return returnVal;
+					}
+					// if the token is an endif, we will return the endif
+					else if(scan.currentToken.subClassif == Token.END &&
+						   (scan.currentToken.tokenStr.equals("endif") || scan.currentToken.tokenStr.equals("else")))
+					{
+						// i wanted to set returnVal and use a break here but the  
+						// switch nested in a while forced me to return from here
+							
+						returnVal.terminatingStr = scan.currentToken.tokenStr;
+						returnVal.value = scan.currentToken;
+						returnVal.iDataType = Token.END;
+						return returnVal; 
 					}
 					else
 					{
@@ -62,55 +96,17 @@ public class Parse
 				// in the case of debug statement set the appropriate variables
 				case Token.DEBUG:
 					//check first token of debug statement
-					if (this.scan.currentToken.tokenStr.equals("debug")) 
-					{
-						this.scan.getNext();
-						// parseDebugStmt will check the next two tokens and set the variables
-						// it will return false if the statement is not formatted correctly
-						if (parseDebugStmt())
-						{
-							this.scan.getNext();
-							scan.currentToken.printToken();
-							//check if the last token on the line is a ';'
-							if(this.scan.currentToken.tokenStr.equals(";"))
-							{
-								// making sure there is no token on the line after ';'
-								if(this.scan.nextToken.iSourceLineNr == this.scan.currentToken.iSourceLineNr)
-								{
-									throw new ScannerTokenFormatException("PARSER ERROR: token on line " + 
-										this.scan.nextToken.iSourceLineNr + " at column " + this.scan.nextToken.iColPos +
-										" appears after a ';' which designates the end of a statement");
-								}	
-							}
-							else
-							{
-								throw new ScannerTokenFormatException("PARSER ERROR: token on line " + 
-									this.scan.currentToken.iSourceLineNr + " at column " + this.scan.currentToken.iColPos +
-									" expected ';' at the end of a Debug statement");
-							}
-						}
-						else
-						{
-							throw new ScannerTokenFormatException("PARSER ERROR: token on line " + 
-								this.scan.nextToken.iSourceLineNr + " at column " + this.scan.nextToken.iColPos +
-								" is formatted incorrectly; format: Debug <type> <on/off>");
-						}
-						scan.getNext();
-					}
-					else
-					{
-						throw new ScannerTokenFormatException("PARSER ERROR: token on line " + 
-							this.scan.nextToken.iSourceLineNr + " at column " + this.scan.nextToken.iColPos +
-							" is formatted incorrectly; format: Debug <type> <on/off>");
-					}
+					parseDebugStmt();
 					break;
 				case Token.FUNCTION:
 					if (this.scan.currentToken.tokenStr.equals("print")) 
 					{
 						callBuiltInFunction("print");
 					}
-					
-					scan.getNext(); // at present, not handling case of other functions	
+					else
+					{
+						scan.getNext(); // at present, not handling case of other functions	
+					}
 					break;
 				// TODO: for now we assume any IDENTIFIER at the beginning of a statement
 				// means we are doing an assignment.
@@ -129,6 +125,7 @@ public class Parse
 					// // this could be valid syntax even though it does nothing
 					if(scan.nextToken.primClassif != Token.SEPARATOR )
 					{
+						System.out.println("FOUND TOKEN FOR ASSIGNMENT");
 						assignmentStmt(bFlag);
 					}
 					else
@@ -157,6 +154,10 @@ public class Parse
 					scan.getNext();
 			}
 		}
+		returnVal.terminatingStr = scan.currentToken.tokenStr;
+		returnVal.value = scan.currentToken;
+		returnVal.iDataType = scan.currentToken.subClassif;
+		return returnVal;
 	}
 
 	private void reclassifyCurrentTokenIdentifier() throws ParserException
@@ -423,6 +424,7 @@ public class Parse
 		// res to the first thing it sees if it's viable then loops until it hits a separator.
 		//
 		// GOOD LUCK NICK
+
 		ResultValue res = null;
 		
 		Stack<ResultValue> operandStack = new Stack<ResultValue>();
@@ -430,6 +432,7 @@ public class Parse
 //		if (scan.currentToken.primClassif == Token.SEPARATOR)
 //			scan.getNext();
 		
+
 		while(scan.currentToken.primClassif != Token.SEPARATOR)
 		{
 			res = convertCurrentTokenToResultValue();
@@ -469,6 +472,11 @@ public class Parse
 		
 		// Call get next to eat the very last separator.
 		//scan.getNext();
+
+		if(scan.dBug.bShowExpr)
+		{
+			System.out.println("EVALUATION OF EXPRESSION RETURNED: \n\t" + res);
+		}
 		return res;
 	}
 
@@ -617,6 +625,117 @@ public class Parse
 		scan.currentToken.printToken();
 		return true;
 	}
+	
+	/**
+	 * 
+	 * @param bExec
+	 * @throws Exception
+	 */
+	private void ifStmt(boolean bExec) throws Exception {
+		ResultValue resCond;
+		// if we are executing
+		if(bExec){
+			//we are executing 
+			resCond = expr();
+			// check the data type of the return value
+			if(resCond.iDataType != Token.BOOLEAN){
+				error("result of the argument was not a true or false");
+			}
+			if(! scan.currentToken.tokenStr.equals(":")){
+				error("expected ':' after if statement");
+			}
+			// if the condition evaluated to true
+			if (((Boolean)resCond.value).booleanValue()){
+				incrementScope();
+				resCond = parseStmt(true);
+				decrementScope();
+				// if there is an else statement
+				if(resCond.terminatingStr.equals("else")){
+					if(! scan.getNext().equals(":")){
+						error("expected ':' after 'else'");
+						
+					}
+					// the else is not executed
+					resCond = parseStmt(false);
+					if (! resCond.terminatingStr.equals("endif")){
+						error("expected endif");
+					}
+				}
+				// another check for endif, this is necessary if there is no else
+				if (! resCond.terminatingStr.equals("endif")){
+					error("expected endif");
+				}
+				// error check endif should end with a ';'
+				if(! scan.getNext().equals(";")){
+					error("expected ';' after endif");
+				}
+			//condition evaluated to false
+			}else{
+				// do not execute, if condition was false
+				resCond = parseStmt(false);
+				// if there is an else statement
+				if(resCond.terminatingStr.equals("else")){
+					if(!scan.getNext().equals(":")){
+						error("expected ':' after 'else'");
+						
+					}
+					// the else is executed because if condition was false
+					incrementScope();
+					resCond = parseStmt(true);
+					decrementScope();
+					if (! resCond.terminatingStr.equals("endif")){
+						error("expected endif");
+					}
+				}
+				// another check for endif, this is necessary if there is no else
+				if (! resCond.terminatingStr.equals("endif")){
+					error("expected endif");
+				}
+				// error check endif should end with a ';'
+				if(! scan.getNext().equals(";")){
+					error("expected ';' after endif");
+				}
+			}
+			
+			
+		// we are not executing	
+		}else{
+			//we are ignoring everything the conditional, true part, false part
+			// nothing will execute but the error checking is necessary so we iterate
+			// through to find any syntax errors 
+			skipTo("if", ":");
+			resCond = parseStmt(false);
+			// if there is an else statement
+			if(resCond.terminatingStr.equals("else")){
+				if(!scan.getNext().equals(":")){
+					error("expected ':' after 'else'");
+					
+				}
+				// the else is not executed
+				resCond = parseStmt(false);
+				if (! resCond.terminatingStr.equals("endif")){
+					error("expected endif");
+				}
+			}
+			// another check for endif, this is necessary trust me. actually tracing this out in my head i don't see the need for the 
+			// check for endif until the end of the function. i'm going to do some tests and i'll clean it up if it's not necessary 
+			if (! resCond.terminatingStr.equals("endif")){
+				error("expected endif");
+			}
+			// error check endif should end with a ';'
+			if(! scan.getNext().equals(";")){
+				error("expected ';' after endif");
+			}
+		}
+		// making sure there is no token on the line after ';'
+		if(this.scan.nextToken.iSourceLineNr == this.scan.currentToken.iSourceLineNr)
+		{
+			throw new ParserException(this.scan.nextToken.iSourceLineNr, "PARSER ERROR: token on line " + 
+				this.scan.nextToken.iSourceLineNr + " at column " + this.scan.nextToken.iColPos +
+				" appears after a ';' which designates the end of a statement", "file name");
+		}
+		scan.getNext();
+	}
 
 	/**
 	 * This is passed an error message and reference objects and throws a corresponding
@@ -639,19 +758,28 @@ public class Parse
 	 * and false if it is invalid.
 	 * @throws ScannerTokenFormatException
 	 */
-	private boolean parseDebugStmt() throws ScannerTokenFormatException {
-		// return statement
-		boolean rStmt = false;
-
+	private void parseDebugStmt() throws Exception {
+		boolean format = false;
+		
+		if (this.scan.currentToken.tokenStr.equals("debug")) 
+		{
+			this.scan.getNext();
+		}
+		else
+		{
+			throw new ParserException(this.scan.nextToken.iSourceLineNr,
+					"PARSER ERROR: token at column " + this.scan.nextToken.iColPos +
+					" is formatted incorrectly; format: debug <type> <on/off>", "file name");
+		}
 		if (this.scan.currentToken.tokenStr.equals("bShowToken")) {
 			this.scan.getNext();
 			if (this.scan.currentToken.tokenStr.equals("on")) {
 				this.scan.dBug.bShowToken = true;
 				System.out.println(" this is bShowtoken: " + scan.dBug.bShowToken);
-				rStmt = true;
+				format = true;
 			} else if (this.scan.currentToken.tokenStr.equals("off")) {
 				this.scan.dBug.bShowToken = false;
-				rStmt = true;
+				format = true;
 			}
 		}
 		else if(this.scan.currentToken.tokenStr.equals("bShowExpr"))
@@ -659,10 +787,10 @@ public class Parse
 			this.scan.getNext();
 			if (this.scan.currentToken.tokenStr.equals("on")) {
 				this.scan.dBug.bShowExpr = true;
-				rStmt = true;
+				format = true;
 			} else if (this.scan.currentToken.tokenStr.equals("off")) {
 				this.scan.dBug.bShowExpr = false;
-				rStmt = true;
+				format = true;
 			}
 		}
 		else if (this.scan.currentToken.tokenStr.equals("bShowAssign"))
@@ -670,13 +798,74 @@ public class Parse
 			this.scan.getNext();
 			if (this.scan.currentToken.tokenStr.equals("on")) {
 				this.scan.dBug.bShowAssign = true;
-				rStmt = true;
+				format = true;
 			} else if (this.scan.currentToken.tokenStr.equals("off")) {
 				this.scan.dBug.bShowAssign = false;
-				rStmt = true;
+				format = true;
 			}
+		
 		}
-		return rStmt;
+		if(! format){
+			throw new ParserException(this.scan.nextToken.iSourceLineNr,
+					"PARSER ERROR: token at column " + this.scan.nextToken.iColPos +
+					" is formatted incorrectly; format: debug <type> <on/off>", "file name");
+		}
+		scan.getNext();
+		
+		if(this.scan.currentToken.tokenStr.equals(";"))
+		{
+			// making sure there is no token on the line after ';'
+			if(this.scan.nextToken.iSourceLineNr == this.scan.currentToken.iSourceLineNr)
+			{
+				throw new ParserException(this.scan.nextToken.iSourceLineNr,
+					"PARSER ERROR: token at column " + this.scan.nextToken.iColPos +
+					" appears after a ';' which designates the end of a statement", "file name");
+			}	
+		}
+		else
+		{
+			throw new ParserException(this.scan.currentToken.iSourceLineNr,
+					"PARSER ERROR: token at column " + this.scan.nextToken.iColPos +
+					" expected ';' at the end of a debug statement", "file name");
+		}
+			
+		scan.getNext();
+	}
+		
+	
+	/**
+	 * this class will skip to the next occurrence of the terminal symbol.
+	 * 
+	 * @param type
+	 * @param terminal
+	 * @throws Exception
+	 */
+	private void skipTo(String type, String terminal) throws Exception{
+		// i think we need to save off the column position and line number for error statements
+		while(! scan.getNext().isEmpty()){
+			if(type.equals("if")){
+				// there needs to be some checks here to tell if
+				// the terminal is within an expression
+				if(scan.currentToken.tokenStr.equals(terminal)){ 
+					break;
+					
+				}
+				if(scan.currentToken.primClassif == Token.CONTROL){
+					error("cannot have a control statement within an if argument");
+				}
+				if(scan.currentToken.primClassif == Token.DEBUG){
+					error("cannot have a debug statement within an if argument");
+				}
+				if(scan.currentToken.primClassif == Token.RT_PAREN){
+					error("cannot have an RT paren within an if argument");
+				}
+				if(scan.currentToken.tokenStr.equals("print")){
+					error("cannot evaluate print function within an if argument");
+				}
+			}
+			
+		}
+		// might need to check to see if we are at the end of file or the function that calls skip to will check for end of file
 	}
 	
 
