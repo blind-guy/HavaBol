@@ -1,9 +1,21 @@
 debug bShowAssign on;
 debug bShowExpr on;
+Bool foo = F;
+if F:
+	print("foo is true!");
+else:
+	print("foo is false!");
+endif;
 Int i;
+i = 3;
+if i == 3:
+	print("I is three!");
+else:
+	print("I is not three!");
+	i += 3;
+endif;
+print("I is now ", i);
 Float pi;
-Bool foo;
-foo = F;
 String day;
    day 
    = 
