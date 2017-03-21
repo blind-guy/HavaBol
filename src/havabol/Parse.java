@@ -101,7 +101,7 @@ public class Parse
 				case Token.FUNCTION:
 					if (this.scan.currentToken.tokenStr.equals("print")) 
 					{
-						callBuiltInFunction("print");
+						callBuiltInFunction("print", bFlag);
 					}
 					else
 					{
@@ -224,7 +224,7 @@ public class Parse
 		// we should call expression().
 		if(operator.tokenStr.equals("="))
 		{
-			res2 = expr();
+			res2 = expr(bFlag);
 			if(res2 == null)
 			{
 				// TODO: this should never equal null actually so something should be done
@@ -249,7 +249,7 @@ public class Parse
 			else
 			{
 				res = getValueOfToken(identifier);
-				res2 = expr();
+				res2 = expr(bFlag);
 				
 				res = res.performOperation(res2, operator.tokenStr.substring(0, 1));
 				if(bFlag)
@@ -418,7 +418,7 @@ public class Parse
 	 * @return ResultValue object containing the result of the expression evaluation.
 	 * @throws Exception
 	 */
-	private ResultValue expr() throws Exception
+	private ResultValue expr(boolean exec) throws Exception
 	{
 		// TODO: there's a lot this should do but right now I'm writing it so it sets
 		// res to the first thing it sees if it's viable then loops until it hits a separator.
@@ -436,8 +436,8 @@ public class Parse
 		while(scan.currentToken.primClassif != Token.SEPARATOR)
 		{
 			res = convertCurrentTokenToResultValue();
-			if (res != null)
-				System.out.println(res.toString() + " primClasif " + scan.currentToken.primClassif);
+//			if (res != null)
+//				System.out.println(res.toString() + " primClasif " + scan.currentToken.primClassif);
 			
 			if (scan.currentToken.primClassif == Token.OPERAND 
 					|| scan.currentToken.primClassif == Token.IDENTIFIER)
@@ -446,14 +446,14 @@ public class Parse
 				operatorStack.push(scan.currentToken.tokenStr);
 			else if (scan.currentToken.primClassif == Token.FUNCTION)
 			{
-				ResultValue temp = callBuiltInFunction(scan.currentToken.tokenStr);
+				ResultValue temp = callBuiltInFunction(scan.currentToken.tokenStr, exec);
 				if (temp != null)
 					operandStack.push(temp);
 			}
 			scan.getNext();
 		}
 		
-		System.out.println("operand size " + operandStack.size() + " operator size " + operatorStack.size());
+		//System.out.println("operand size " + operandStack.size() + " operator size " + operatorStack.size());
 
 		if (operandStack.size() == 1 && operatorStack.size() == 1)
 		{
@@ -636,7 +636,7 @@ public class Parse
 		// if we are executing
 		if(bExec){
 			//we are executing 
-			resCond = expr();
+			resCond = expr(bExec);
 			// check the data type of the return value
 			if(resCond.iDataType != Token.BOOLEAN){
 				error("result of the argument was not a true or false");
@@ -869,18 +869,18 @@ public class Parse
 	}
 	
 
-	private ResultValue callBuiltInFunction(String func) throws Exception
+	private ResultValue callBuiltInFunction(String func, boolean bFlag) throws Exception
 	{
 		if (func.equals("print"))
 		{
-			print();
+			print(bFlag);
 			return null;
 		}
 		
 		return new ResultValue();
 	}
 	
-	private void print() throws Exception
+	private void print(boolean exec) throws Exception
 	{
 		scan.getNext();
 		int parenthesisCounter = 0;
@@ -890,21 +890,54 @@ public class Parse
 		ArrayList<ResultValue> results = new ArrayList<ResultValue>();
 		scan.getNext();
 		
-		while (parenthesisCounter > 0)
+		if (exec == true) 
 		{
-			//System.out.println("loop " + scan.currentToken.tokenStr);
-			results.add(expr());
-			if (scan.currentToken.tokenStr.equals(")"))
-				parenthesisCounter--;
-			else if (scan.currentToken.tokenStr.equals("("))
-				parenthesisCounter++;
-			scan.getNext();
+			while (parenthesisCounter > 0)
+			{
+				//System.out.println("loop " + scan.currentToken.tokenStr);
+				results.add(expr(exec));
+				
+				if (scan.currentToken.tokenStr.equals(")"))
+					parenthesisCounter--;
+				else if (scan.currentToken.tokenStr.equals("("))
+					parenthesisCounter++;
+				scan.getNext();
+			}
+		}
+		else 
+		{
+			while (parenthesisCounter > 0)
+			{
+				if (scan.currentToken.tokenStr.equals(";"))
+					error("Malformed print statement");
+				
+				if (scan.currentToken.tokenStr.equals(")"))
+					parenthesisCounter--;
+				else if (scan.currentToken.tokenStr.equals("("))
+					parenthesisCounter++;
+				if (scan.currentToken.primClassif == Token.SEPARATOR
+						&& scan.nextToken.primClassif == Token.SEPARATOR)
+				{
+					if (!scan.currentToken.tokenStr.equals(")")
+							&& scan.nextToken.tokenStr.equals(";"))
+					{
+						error("No argument betweeen " + scan.currentToken.tokenStr
+								+ scan.nextToken.tokenStr);
+					}
+				}
+				
+				scan.getNext();
+			}
 		}
 		//System.out.println("results size " + results.size());
 		
-		for (ResultValue rs : results)
-			System.out.print(rs.value.toString().concat(" "));
-		System.out.println();
+		if (exec == true) {
+			for (ResultValue rs : results)
+				System.out.print(rs.value.toString().concat(" "));
+			System.out.println();
+		}
+		
+		
 		if (scan.currentToken.tokenStr.equals(";"))
 		{
 			scan.getNext();
@@ -963,7 +996,7 @@ public class Parse
 		// Copy the condition Token so we have our position saved and get the result value
 		// for its evaluation.
 		conditionToken  = Token.copyToken(scan.currentToken);
-		conditionResult = expr();
+		conditionResult = expr(bFlag);
 		
 		// See if we were given a result which is the proper value type.
 		if(conditionResult.iDataType != Token.BOOLEAN)
@@ -1029,7 +1062,7 @@ public class Parse
 				// Reevaluate the conditional and increment the scanner.
 				// We've error checked this before so there's no need to see if
 				// it's still a valid separator.
-				conditionResult = expr();
+				conditionResult = expr(bFlag);
 				scan.getNext();
 			}
 			// TODO: this needs a proper skipTo()
