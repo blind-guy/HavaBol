@@ -1,0 +1,10 @@
+Int i;
+Int j;
+i = 4;
+j = 5;
+print(i + j);
+String str;
+str = "1";
+print(str + i);
+j = str + i;
+print(j * str);

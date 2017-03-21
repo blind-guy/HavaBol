@@ -134,7 +134,8 @@ public class ResultValue {
 			}
 			else if (rightOperand.iDataType == Token.STRING)
 			{
-				Numeric tempRightOperand = new Numeric((String) rightOperand.value, rightOperand.iDataType);
+				Numeric tempRightOperand = new Numeric(((StringBuilder) rightOperand.value).toString()
+						, rightOperand.iDataType);
 				if (operation.equals("+"))
 					result = ((Numeric) value).add(tempRightOperand).toString();
 				else if (operation.equals("-"))
@@ -246,6 +247,46 @@ public class ResultValue {
 			
 			if (operation.equals("#"))
 				result = new StringBuilder(((StringBuilder) value).toString().concat(rightOperStr));
+			else if (operation.equals("+")) 
+			{
+				Numeric leftOp, rightOp;
+				leftOp = new Numeric(value.toString(), Token.STRING);
+				rightOp = new Numeric(rightOperand.value.toString(), Token.STRING);
+				result = leftOp.add(rightOp);
+				resultType = leftOp.type;
+			}
+			else if (operation.equals("-")) 
+			{
+				Numeric leftOp, rightOp;
+				leftOp = new Numeric(value.toString(), Token.STRING);
+				rightOp = new Numeric(rightOperand.value.toString(), Token.STRING);
+				result = leftOp.subtract(rightOp);
+				resultType = leftOp.type;
+			}
+			else if (operation.equals("*")) 
+			{
+				Numeric leftOp, rightOp;
+				leftOp = new Numeric(value.toString(), Token.STRING);
+				rightOp = new Numeric(rightOperand.value.toString(), Token.STRING);
+				result = leftOp.multiply(rightOp);
+				resultType = leftOp.type;
+			}
+			else if (operation.equals("/")) 
+			{
+				Numeric leftOp, rightOp;
+				leftOp = new Numeric(value.toString(), Token.STRING);
+				rightOp = new Numeric(rightOperand.value.toString(), Token.STRING);
+				result = leftOp.divide(rightOp);
+				resultType = leftOp.type;
+			}
+			else if (operation.equals("^")) 
+			{
+				Numeric leftOp, rightOp;
+				leftOp = new Numeric(value.toString(), Token.STRING);
+				rightOp = new Numeric(rightOperand.value.toString(), Token.STRING);
+				result = leftOp.power(rightOp);
+				resultType = leftOp.type;
+			}
 			else if (operation.equals("=="))
 			{
 				if (((StringBuilder) value).toString().equals(rightOperStr))
