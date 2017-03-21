@@ -237,7 +237,7 @@ public class ResultValue {
 			if (rightOperand.iDataType == Token.STRING)
 				rightOperStr = ((StringBuilder) rightOperand.value).toString();
 			else if (rightOperand.iDataType == Token.BOOLEAN)
-				rightOperStr = (String) rightOperand.value;
+				rightOperStr = ((Boolean) rightOperand.value).toString();
 			else if (rightOperand.isNum)
 				rightOperStr = ((Numeric) rightOperand.value).toString();
 			else

@@ -369,26 +369,92 @@ public class Parse
 		// TODO: this should be updated in the future to accommodate future types
 		// and it should really shrunk down since the code in each if statement
 		// is repeated.
-		if(storedObject instanceof  Boolean && 
-		   res2.iDataType  == Token.BOOLEAN &&
-		   stEntry.dclType == Token.BOOLEAN)
+		
+		// If the stored object is an istance of a Boolean,
+		// try to evaluate the right res2 val to a Boolean.
+		Object valueToStore = null;
+		if(storedObject instanceof  Boolean)
 		{
-			storage.put(key, res2.value);
-			res = new ResultValue(res2.iDataType, res2.value);
+			if(stEntry.dclType != Token.BOOLEAN)
+			{
+				error("storage object and identifier types do not match");
+			}
+			
+			if(res2.iDataType == Token.BOOLEAN)
+			{
+				valueToStore = res2.value;
+			}
+			else if(res2.iDataType == Token.STRING)
+			{
+				valueToStore = new Boolean(Boolean.parseBoolean(((StringBuilder) res2.value).toString()));
+			}
+			else if(res2.isNum)
+			{
+				error("cannot coerce numeric types to boolean values");
+			}
+			storage.put(key, valueToStore);
+			res = new ResultValue(stEntry.dclType, valueToStore);
 		}
-		else if(storedObject instanceof Numeric &&
-			    res2.isNum &&
-			   (stEntry.dclType == Token.INTEGER || stEntry.dclType == Token.FLOAT))
+		else if(storedObject instanceof Numeric)
 		{
-			storage.put(key, res2.value);
-			res = new ResultValue(res2.iDataType, res2.value);
+			if(stEntry.dclType != Token.INTEGER && stEntry.dclType != Token.FLOAT)
+			{
+				error("storage object and idnetifier types do not match");
+			}
+
+			if(res2.iDataType == Token.BOOLEAN)
+			{
+				error("cannot coerce boolean to numeric type");
+			}
+			else if(res2.iDataType == Token.STRING)
+			{
+				if(stEntry.dclType == Token.INTEGER)
+				{
+					valueToStore = new Numeric("" + Integer.parseInt(((StringBuilder) res2.value).toString()), Token.INTEGER);
+				}
+				else if(stEntry.dclType == Token.FLOAT)
+				{
+					valueToStore = new Numeric("" + Double.parseDouble(((StringBuilder) res2.value).toString()), Token.FLOAT);
+				}
+			}
+			else if(res2.isNum)
+			{
+				valueToStore = new Numeric(((Numeric) res2.value).toString(), stEntry.dclType);
+			}
+			
+			storage.put(key, valueToStore);
+			res = new ResultValue(stEntry.dclType, valueToStore);
 		}
-		else if(storedObject instanceof StringBuilder &&
-				res2.iDataType  == Token.STRING &&
-				stEntry.dclType == Token.STRING)	
+		else if(storedObject instanceof StringBuilder)
 		{
-			storage.put(key, res2.value);
-			res = new ResultValue(res2.iDataType, res2.value);
+			if(stEntry.dclType != Token.STRING)
+			{
+				error("storage object and identifier types do not match");
+			}
+		
+			if(res2.iDataType == Token.BOOLEAN)
+			{
+				if(((Boolean) res2.value).booleanValue())
+				{
+					valueToStore = new StringBuilder("T");
+				}
+				else
+				{
+					valueToStore = new StringBuilder("F");
+				}
+			}
+			else if(res2.iDataType == Token.STRING)
+			{
+				valueToStore = new StringBuilder(((StringBuilder) res2.value).toString());
+			}
+			else if(res2.isNum)
+			{
+				valueToStore = new StringBuilder(((Numeric) res2.value).toString());
+			}
+			
+	
+			storage.put(key, valueToStore);
+			res = new ResultValue(stEntry.dclType, valueToStore);
 		}
 		else
 		{
@@ -612,7 +678,6 @@ public class Parse
 		{
 			storage.put(scan.nextToken.tokenStr, stObject);
 			scan.symbolTable.putSymbol(scan.nextToken.tokenStr, stEntry);
-			// System.out.println("\tSTENTRY CREATED FOR KEY: " + scan.nextToken.tokenStr + "\n\tITS TYPE IS: " + Token.strSubClassifM[stEntry.dclType]);
 		}
 		
 		// Set the next token and update its prime and sub-classifications now that we've
@@ -620,7 +685,6 @@ public class Parse
 		scan.nextToken.primClassif = stEntry.primClassif;
 		scan.nextToken.subClassif = stEntry.dclType;
 		scan.getNext();
-		// scan.currentToken.printToken();
 		return true;
 	}
 	
@@ -973,6 +1037,10 @@ public class Parse
 				keys.add(entry.getKey());
 			}
 		}
+		
+		// Each of these keys is associated with an idnetifier in the current scope.
+		// Remove their corresponding entries from the storage object and
+		// SymbolTable.
 		for(String key: keys)
 		{
 			storage.remove(key);
@@ -1061,19 +1129,4 @@ public class Parse
 			scan.getNext();
 		}
 	}
-
-	/*public static class Debug{
-
-		// these variables are set to private out of habit 
-		// we can change to public and get rid of the getters and setters
-		public boolean bShowToken;
-		public boolean bShowExpr;
-		public boolean bShowAssign;
-		
-		public Debug(){
-			this.bShowToken = false;
-			this.bShowExpr = false;
-			this.bShowAssign = false;
-		}
-	}*/
 }
