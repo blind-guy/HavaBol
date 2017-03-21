@@ -42,13 +42,11 @@ public class Parse
 			// check the primary class of the current token
 			switch (this.scan.currentToken.primClassif)
 			{
-				// TODO: handle all control tokens and their sub-classifications.
+				// Handle all control tokens and their sub-classifications.
+				//
 				// It's important to note that we MUST call scan.getNext() to iterate
 				// through tokens which match this primary classification but do not
 				// yet have their sub-classifications handled.
-				//
-				// Handled So Far:
-				//		Token.DECLARE
 				case Token.CONTROL:
 					if(scan.currentToken.subClassif == Token.DECLARE)
 					{
@@ -115,7 +113,7 @@ public class Parse
 				// through tokens which match this primary classification but do not
 				// yet have their sub-classifications or sub-cased handled.
 				//
-				// For now we follow the pattern of any identifier followed by a separator
+				// For now we follow the pattern of any identifier not followed by a separator
 				// is an assignment.
 				case Token.IDENTIFIER:
 					// TODO: this might not be quite right but I need to not
@@ -125,7 +123,7 @@ public class Parse
 					// // this could be valid syntax even though it does nothing
 					if(scan.nextToken.primClassif != Token.SEPARATOR )
 					{
-						System.out.println("FOUND TOKEN FOR ASSIGNMENT");
+						// System.out.println("FOUND TOKEN FOR ASSIGNMENT");
 						assignmentStmt(bFlag);
 					}
 					else
@@ -614,7 +612,7 @@ public class Parse
 		{
 			storage.put(scan.nextToken.tokenStr, stObject);
 			scan.symbolTable.putSymbol(scan.nextToken.tokenStr, stEntry);
-			System.out.println("\tSTENTRY CREATED FOR KEY: " + scan.nextToken.tokenStr + "\n\tITS TYPE IS: " + Token.strSubClassifM[stEntry.dclType]);
+			// System.out.println("\tSTENTRY CREATED FOR KEY: " + scan.nextToken.tokenStr + "\n\tITS TYPE IS: " + Token.strSubClassifM[stEntry.dclType]);
 		}
 		
 		// Set the next token and update its prime and sub-classifications now that we've
@@ -622,7 +620,7 @@ public class Parse
 		scan.nextToken.primClassif = stEntry.primClassif;
 		scan.nextToken.subClassif = stEntry.dclType;
 		scan.getNext();
-		scan.currentToken.printToken();
+		// scan.currentToken.printToken();
 		return true;
 	}
 	
@@ -775,7 +773,7 @@ public class Parse
 			this.scan.getNext();
 			if (this.scan.currentToken.tokenStr.equals("on")) {
 				this.scan.dBug.bShowToken = true;
-				System.out.println(" this is bShowtoken: " + scan.dBug.bShowToken);
+				// System.out.println(" this is bShowtoken: " + scan.dBug.bShowToken);
 				format = true;
 			} else if (this.scan.currentToken.tokenStr.equals("off")) {
 				this.scan.dBug.bShowToken = false;
@@ -1001,31 +999,7 @@ public class Parse
 		// See if we were given a result which is the proper value type.
 		if(conditionResult.iDataType != Token.BOOLEAN)
 		{
-			// TODO: needs to be modified once expressions are properly parsed
-			// error("could not resolve while condition to boolean type");
-			//
-			// For now, it simply loops until we hit the endwhile, checks syntax
-			// and returns. 
-			while(scan.currentToken.primClassif != Token.CONTROL || 
-				  scan.currentToken.subClassif != Token.END ||
-				  !scan.currentToken.tokenStr.equals("endwhile"))
-			{
-				scan.getNext();
-			}
-			if(scan.nextToken.primClassif != Token.SEPARATOR ||
-			   !scan.nextToken.tokenStr.equals(";"))
-			{
-				error("invalid syntax at end of while loop: expected ';' but received '" +
-					scan.nextToken.tokenStr + "'");
-			}
-			else
-			{
-				scan.getNext();
-				scan.getNext();
-				return ;
-			}
-			// EVERYTHING BETWEEN THE ABOVE COMMENT TO THIS LINE SHOULD BE REMOVED WHEN
-			// PROPER EXPRESSION PARSING IS HANDLED
+			error("while condition could not be evaluated to boolean");
 		}
 		
 		// Check to see if we're on the correct separator for syntax reasons.
@@ -1065,13 +1039,8 @@ public class Parse
 				conditionResult = expr(bFlag);
 				scan.getNext();
 			}
-			// TODO: this needs a proper skipTo()
-			while(scan.currentToken.primClassif != Token.CONTROL || 
-				  scan.currentToken.subClassif != Token.END ||
-				  !scan.currentToken.tokenStr.equals("endwhile"))
-			{
-				scan.getNext();
-			}
+
+			parseStmt(false);
 		}
 		else
 		{ 
