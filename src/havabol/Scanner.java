@@ -54,6 +54,10 @@ public class Scanner
 	 */
 	public String getNext() throws ScannerTokenFormatException
 	{
+		
+		/**
+		 * Removed for Project 3 submission.
+		
 		// If the nextToken which is about to replace our currentToken marks
 		// the beginning of a new line, then we print all lines between our currentToken
 		// source line up to and including the source line with our nextToken.
@@ -73,6 +77,7 @@ public class Scanner
 				System.out.println("  " + (lineNum + 1) + " " + this.sourceLineM.get(lineNum));	
 			}
 		}
+		 */
 		this.currentToken = Token.copyToken(this.nextToken);
 		this.nextToken = createNextToken();
 		
