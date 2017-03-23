@@ -1,0 +1,36 @@
+﻿Project 4 Roadmap - OG Programmers
+
+
+Final Submission: 2017/4/11
+
+
+Description:
+        Expand the Havabol interpreter to handle the following:
+* arrays
+* complex expressions
+* other built-in functions
+* for loops
+* expanded String functionality
+
+
+Milestone 1: Friday, March 31, 2017
+Elijah:
+* array assignments
+* scalars and arrays may be sources
+
+
+Nick:
+* complex/mixed expressions (no array element support)
+
+
+Jake:
+* for loops using Strings and counters
+
+
+Milestone 2: Sunday, April 9, 2017
+Elijah:
+* built-in functions
+* Nick:
+* expressions involving array elements
+* Nick:
+* for loops using array elements
