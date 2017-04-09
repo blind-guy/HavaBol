@@ -152,6 +152,7 @@ public class Parse
 		returnVal.terminatingStr = scan.currentToken.tokenStr;
 		returnVal.value = scan.currentToken;
 		returnVal.iDataType = scan.currentToken.subClassif;
+
 		return returnVal;
 	}
 
@@ -232,7 +233,7 @@ public class Parse
 				}
 			}
 			if(scan.currentToken.primClassif != Token.SEPARATOR || 
-					   !scan.currentToken.tokenStr.equals("]"))
+			   !scan.currentToken.tokenStr.equals("]"))
 			{
 				scan.currentToken.printToken();
 				error("invalid expression given for array size");
@@ -269,16 +270,21 @@ public class Parse
 				
 				while(true)
 				{
-					scan.currentToken.printToken();
-
-					arrayIndex++;
 					if(scan.currentToken.primClassif == Token.SEPARATOR &&
-					   scan.currentToken.tokenStr.equals(","))
+					   scan.currentToken.tokenStr.equals(";"))
 					{
+						break;
+					}
+					else if(scan.currentToken.primClassif == Token.SEPARATOR &&
+							scan.currentToken.tokenStr.equals(","))
+					{
+						arrayIndex++;
 						array.unsafeAppend(null);
 						scan.getNext();
 						continue;
 					}
+					
+					arrayIndex++;
 					ResultValue resValToStore = expr(bFlag);
 					System.out.println(resValToStore);
 					
@@ -294,8 +300,6 @@ public class Parse
 							}
 							else if(resValToStore.iDataType == Token.INTEGER)
 							{
-								// TODO: store this in the array given the current
-								// index
 								array.unsafeAppend(resValToStore);
 							}
 							else if(resValToStore.iDataType == Token.FLOAT)
@@ -322,7 +326,36 @@ public class Parse
 							}
 							break;
 						case Token.FLOAT:
-							
+							if(resValToStore.iDataType == Token.BOOLEAN)
+							{
+								error("cannot convert Bool to float type");
+							}
+							else if(resValToStore.iDataType == Token.FLOAT)
+							{
+								array.unsafeAppend(resValToStore);
+							}
+							else if(resValToStore.iDataType == Token.INTEGER)
+							{
+								resValToStore = new ResultValue(Token.FLOAT, "" + ((Numeric) resValToStore.value).doubleValue);
+								array.unsafeAppend(resValToStore);
+							}
+							else if(resValToStore.iDataType == Token.STRING)
+							{
+								// convert the string to an integer if possible
+								resValToStore = new ResultValue(
+														Token.FLOAT, 
+														"" + new Numeric(
+																"" + new Numeric(
+																		((StringBuilder) resValToStore.value).toString(), 
+																		Token.FLOAT
+																	).doubleValue,
+																Token.FLOAT
+															).doubleValue
+														);
+								array.unsafeAppend(resValToStore);
+								
+								System.out.println(resValToStore);
+							}
 							break;
 						case Token.STRING:
 							
@@ -334,18 +367,19 @@ public class Parse
 							break;
 					}			
 					if(scan.currentToken.primClassif == Token.SEPARATOR &&
-							   scan.currentToken.tokenStr.equals(";"))
-					{
-						scan.currentToken.printToken();
-						System.out.print("Found terminating token");
-						break;
-					}
-					else 
+					   scan.currentToken.tokenStr.equals(","))
 					{
 						scan.getNext();
 					}
 				}
-				System.out.println("Finished adding values to array.");
+				if(array.maxSize == 0)
+				{
+					array.maxSize = arrayIndex + 1;
+				}
+				else if(array.maxSize < arrayIndex + 1)
+				{
+					error("assigned more values to array than its declared size");
+				}
 			}
 			else if(scan.currentToken.primClassif != Token.SEPARATOR ||
 					!scan.currentToken.tokenStr.equals(";"))

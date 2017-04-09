@@ -7,4 +7,10 @@ print ("iSimp=", iSimp);
 
 print("Array C with elements printed using constant subscripts");
 
-Int iCM[10] = 10, 20, 30, "40.0", 50, 60;
+Int iCM[10] = 10, "20", 30, "40.0", 50, 60;
+
+print("Declaring float array.");
+
+Float fCM[10] = 10.0, 20, "30", "40.0", 50.0, 60.0;
+Int foo = 5;
+print(foo);

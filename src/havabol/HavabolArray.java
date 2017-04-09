@@ -22,4 +22,19 @@ public class HavabolArray
 		array.add(resValToStore);
 		currentMaxIndex++;
 	}
+	
+	@Override
+	public String toString()
+	{
+		String ret = "TYPE:      " + Token.strSubClassifM[dclType] + "\n" +
+					 "MAXSIZE:   " + maxSize + "\n" +
+					 "MAXELEM:   " + currentMaxIndex + "\n" +
+					 "UNBOUNDED: " + isUnbounded + "\n";
+		for(ResultValue val: array)
+		{
+			ret = ret + "\t" + val + "\n";
+		}
+		
+		return ret;
+	}
 }
