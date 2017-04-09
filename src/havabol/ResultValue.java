@@ -21,6 +21,9 @@ public class ResultValue {
 			{
 				value = val;
 			}
+			else if (val instanceof HavabolArray) {
+				value = val;
+			}
 			else
 			{
 				value = new Numeric(val.toString(), type);

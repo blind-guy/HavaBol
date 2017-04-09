@@ -906,6 +906,21 @@ public class Parse
 		return res;
 	}
 
+	private int getSubscript() throws Exception {
+		if (!scan.currentToken.tokenStr.equals("["))
+			error("[ missing from subscript");
+		scan.getNext();
+		ResultValue index = expr(true);
+		if (!scan.currentToken.tokenStr.equals("]"))
+			error("] missing from subscript");
+		//scan.getNext();
+		
+		if (index.iDataType != Token.INTEGER)
+			error("Integer is expected for subscript");
+		
+		return ((Numeric) index.value).intValue;
+	}
+	
 	/**
 	 * This evaluates some expression and returns the result of that evaluation.
 	 * 
@@ -948,10 +963,53 @@ public class Parse
 //				System.out.print(t.tokenStr + " ");
 //			System.out.println();
 			
-			if (scan.currentToken.primClassif == Token.OPERAND
-					|| scan.currentToken.primClassif == Token.IDENTIFIER) 
+			if (scan.currentToken.primClassif == Token.OPERAND) 
 			{
 				postfixExpr.add(scan.currentToken);
+			}
+			else if (scan.currentToken.primClassif == Token.IDENTIFIER)	{
+				//boogle 
+				
+				ResultValue tempeh = getValueOfToken(scan.currentToken);
+				Token tempTok;
+				//scan.currentToken.printToken();
+				//System.out.println(tempeh.toString());
+				if (tempeh.value instanceof HavabolArray) 
+				{
+					scan.getNext();
+					int index = getSubscript();
+					tempeh = ((HavabolArray) tempeh.value).getElement(index);
+					
+					tempTok = new Token(tempeh.value.toString());
+					tempTok.primClassif = Token.OPERAND;
+					tempTok.subClassif = tempeh.iDataType;
+					postfixExpr.add(tempTok);
+					//scan.currentToken.printToken();
+				}
+				else if (tempeh.iDataType == Token.STRING && scan.nextToken.tokenStr.equals("[")) 
+				{
+					scan.getNext();
+					int index = getSubscript();
+					//System.out.println(index);
+					if (index > tempeh.value.toString().length())
+						error("Index out of bounds");
+					else if (index < 0 && 
+							tempeh.value.toString().length() + index > tempeh.value.toString().length()) {
+						error("Index out of bounds");
+					}
+					else if (index < 0)
+						index = tempeh.value.toString().length() + index;
+					
+					tempeh = new ResultValue(Token.STRING, 
+							(tempeh.value.toString()).substring(index, index+1));
+					
+					tempTok = new Token(tempeh.value.toString());
+					tempTok.primClassif = Token.OPERAND;
+					tempTok.subClassif = tempeh.iDataType;
+					postfixExpr.add(tempTok);
+				}
+				else
+					postfixExpr.add(scan.currentToken);
 			}
 			else if (scan.currentToken.primClassif == Token.OPERATOR) 
 			{
