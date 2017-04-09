@@ -1,0 +1,17 @@
+// arrays, element assignment, for loops
+// do simple variables still work?
+
+print("p4Array.txt");
+Int iSimp = 50;
+print ("iSimp=", iSimp);
+
+print("Array C with elements printed using constant subscripts");
+
+Int iCM[10] = 10, "20", 30, "40.0", 50, 60, , ,35;
+
+print("Declaring float array.");
+
+Float fCM[10] = 10.0, 20, "30.5", "40.0", 50.0, 60.0;
+Bool bCM[] = T, F, T, , F;
+String foo[7] = 1, "two", 3.0, "the quick brown fox", F;
+
