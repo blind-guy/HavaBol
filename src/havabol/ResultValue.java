@@ -391,6 +391,13 @@ public class ResultValue {
 			return null;
 	}
 	
+	public static boolean isNonBooleanOperation(String operator) {
+		return operator.equals("+") || operator.equals("-") || 
+				operator.equals("*") || operator.equals("/") || 
+				operator.equals("^") || operator.equals("#");
+	}
+	
+	
 	@Override
 	public String toString() {
 		return Token.strSubClassifM[iDataType] + " " + value.toString();
