@@ -395,6 +395,7 @@ public class Scanner
 			token.tokenStr = Character.toString(this.textCharM[this.iColPos]);
 			
 		}
+		
 		// Increment the column position.
 		this.iColPos++;
 	}
