@@ -57,6 +57,11 @@ public class Parse
 					{
 						whileStmt(bFlag);				
 					}
+					else if(scan.currentToken.subClassif == Token.FLOW &&
+							scan.currentToken.tokenStr.equals("for"))
+					{
+						forStmt(bFlag);				
+					}
 					// in the case of an if statement we call ifStmt
 					else if(scan.currentToken.subClassif == Token.FLOW &&
 							scan.currentToken.tokenStr.equals("if"))
@@ -67,6 +72,14 @@ public class Parse
 					}
 					else if(scan.currentToken.subClassif == Token.END &&
 							scan.currentToken.tokenStr.equals("endwhile"))
+					{
+						returnVal.terminatingStr = scan.currentToken.tokenStr;
+						returnVal.value = scan.currentToken;
+						returnVal.iDataType = Token.END;
+						return returnVal;
+					}
+					else if(scan.currentToken.subClassif == Token.END &&
+							scan.currentToken.tokenStr.equals("endfor"))
 					{
 						returnVal.terminatingStr = scan.currentToken.tokenStr;
 						returnVal.value = scan.currentToken;
@@ -689,7 +702,11 @@ public class Parse
 	}
 	
 	/**
-	 * 
+	 * this function will check the format of an if statement
+	 * and will decide whether the statement should be executed.
+	 * if the statement needs to be executed statements is passed
+	 * a true boolean. if statements is not executed then it is passed a
+	 * false boolean.
 	 * @param bExec
 	 * @throws Exception
 	 */
@@ -925,6 +942,21 @@ public class Parse
 					error("cannot evaluate print function within an if argument");
 				}
 			}
+			if(type.equals("for")){
+				
+				if(scan.currentToken.tokenStr.equals(terminal)){
+					break;
+				}
+				if(scan.currentToken.primClassif == Token.DEBUG){
+					error("cannot have a debug statement within an if argument");
+				}
+				if(scan.currentToken.primClassif == Token.RT_PAREN){
+					error("cannot have an RT paren within an if argument");
+				}
+				if(scan.currentToken.tokenStr.equals("print")){
+					error("cannot evaluate print function within an if argument");
+				}
+			}
 			
 		}
 		// might need to check to see if we are at the end of file or the function that calls skip to will check for end of file
@@ -1128,5 +1160,109 @@ public class Parse
 			scan.getNext();
 			scan.getNext();
 		}
+	}
+	
+	private void forStmt( boolean bFlag ) throws Exception 
+	{
+		Token savedPosition;
+		ResultValue controlValue = new ResultValue();
+		ResultValue limitValue = new ResultValue();
+		ResultValue incrementValue = new ResultValue();
+		ArrayList<ResultValue> forValues = new ArrayList<ResultValue>();
+		forValues.add(controlValue);
+		forValues.add(limitValue);
+		forValues.add(incrementValue);
+		
+		if (bFlag) {
+
+			// increment scope so that we can clean up the control variable when
+			// scope is decremented
+			incrementScope();
+
+			// first entering the loop for is the current token. the loop will
+			// stop once we
+			// hit to. second time through it will stop once we hit by and the
+			// last time through
+			// it will stop at the colon(punctuation) ":"
+			for (int i = 0; i < forValues.size(); i++) {
+				// first value should be set as the control value
+				if (i == 0) {
+					this.scan.currentToken.tokenStr = "Int";
+					this.scan.currentToken.primClassif = 6;
+					this.scan.currentToken.subClassif = 12;
+					declareStmt(bFlag);
+					// set the control value
+					forValues.set(i, assignmentStmt(bFlag));
+				}
+
+				else {
+					// scan to get to the expression
+					this.scan.getNext();
+					forValues.set(i, expr(bFlag));
+				}
+
+				// check if all the values evaluate to a number
+				if (!forValues.get(i).isNum) {
+					error("format : for cv = sv to limit by incr:\n values for cv, sv, limit, incr"
+							+ "must evaluate to an integer");
+				}
+
+				if (i == 0) {
+					if (!this.scan.currentToken.tokenStr.equals("to")) {
+						error("format : for cv = sv to limit by incr:\n expected 'to' after " + "after cv = sv");
+					}
+				}
+
+				if (i == 1) {
+					if (!this.scan.currentToken.tokenStr.equals("by")) {
+						error("format : for cv = sv to limit by incr:\n expected 'by' after " + "after Limit");
+					}
+				}
+
+				if (i == 2) {
+					if (!this.scan.currentToken.tokenStr.equals(":")) {
+						error("format : for cv = sv to limit by incr:\n expected ':' at the end" + "of the statement");
+					}
+				}
+
+			}
+
+			// to get to the first element after the colon
+			this.scan.getNext();
+			savedPosition = Token.copyToken(this.scan.currentToken);
+
+			while ((Boolean) forValues.get(0).performBooleanOperation(forValues.get(1), "!=")) {
+				// this will return once we have hit end for
+				parseStmt(bFlag);
+
+				// set the position back to the top of the loop
+				this.scan.setPos(savedPosition);
+				
+				// increment the control value
+				forValues.set(0, forValues.get(0).performOperation(forValues.get(2), "+"));
+
+			}
+			parseStmt(false);
+
+		}
+		// bFlag is false 
+		else{
+			skipTo("for", ":");
+			parseStmt(false);
+		}
+		// We've finished executing the loop and need to check to make sure the last
+		// separator is valid for syntax reasons.
+		if(scan.nextToken.primClassif != Token.SEPARATOR ||
+			!scan.nextToken.tokenStr.equals(";"))
+		{
+			error("invalid syntax at end of while loop: expected ';' but received '" +
+				scan.nextToken.tokenStr + "'");
+		}
+		else
+		{
+			scan.getNext();
+			scan.getNext();
+		}
+		
 	}
 }
