@@ -431,6 +431,163 @@ public class Parse
 				return;
 			}
 		}
+		// If size is already set, we might be doing a scalar
+		// assignment.
+		//
+		// We need to check if we have an expression to parse.
+		else
+		{
+			scan.getNext();
+			scan.getNext();
+			
+			// If we do not see the right side bracket,
+			// this should be where an expression is.
+			if((scan.currentToken.primClassif != Token.SEPARATOR) || 
+			   (scan.currentToken.primClassif == Token.SEPARATOR && 
+			    !scan.currentToken.tokenStr.equals("]")))
+			{
+				ResultValue indexResVal = expr(bFlag);
+				if(indexResVal.iDataType != Token.INTEGER)
+				{
+					error("index expression when making assignment to array must evaluate to integer");
+				}
+				else if(scan.currentToken.primClassif != Token.SEPARATOR || 
+						!scan.currentToken.tokenStr.equals("]") ||
+						scan.nextToken.primClassif != Token.OPERATOR ||
+						!scan.nextToken.tokenStr.equals("="))
+				{
+					error("invalid expression given in scalar array assignment");
+				}
+				
+				scan.getNext();
+				scan.getNext();
+				
+				ResultValue resValToStore = expr(bFlag);
+				
+				switch(array.dclType)
+				{
+					case Token.INTEGER:
+						if(resValToStore.iDataType == Token.BOOLEAN)
+						{
+							error("cannot convert Bool to integer type");
+						}
+						else if(resValToStore.iDataType == Token.INTEGER)
+						{
+							resValToStore = new ResultValue(
+													resValToStore.iDataType,
+													new Numeric(
+															((Numeric) resValToStore.value).stringValue,
+															resValToStore.iDataType
+														)
+													);
+						}
+						else if(resValToStore.iDataType == Token.FLOAT)
+						{
+							resValToStore = new ResultValue(
+													Token.INTEGER, 
+													"" + ((Numeric) resValToStore.value).intValue
+												);
+						}
+						else if(resValToStore.iDataType == Token.STRING)
+						{
+							// convert the string to an integer if possible
+							resValToStore = new ResultValue(
+													Token.INTEGER, 
+													"" + new Numeric(
+															"" + new Numeric(
+																	((StringBuilder) resValToStore.value).toString(), 
+																	Token.FLOAT
+																).intValue,
+															Token.INTEGER
+														).intValue
+													);
+						}
+						break;
+					case Token.FLOAT:
+						if(resValToStore.iDataType == Token.BOOLEAN)
+						{
+							error("cannot convert Bool to float type");
+						}
+						else if(resValToStore.iDataType == Token.FLOAT)
+						{
+							resValToStore = new ResultValue(
+												resValToStore.iDataType,
+												new Numeric(
+														((Numeric) resValToStore.value).stringValue,
+														resValToStore.iDataType
+													)
+												);
+						}
+						else if(resValToStore.iDataType == Token.INTEGER)
+						{
+							resValToStore = new ResultValue(Token.FLOAT, "" + ((Numeric) resValToStore.value).doubleValue);
+						}
+						else if(resValToStore.iDataType == Token.STRING)
+						{
+							// convert the string to an integer if possible
+							resValToStore = new ResultValue(
+													Token.FLOAT, 
+													"" + new Numeric(
+															"" + new Numeric(
+																	((StringBuilder) resValToStore.value).toString(), 
+																	Token.FLOAT
+																).doubleValue,
+															Token.FLOAT
+														).doubleValue
+													);
+						}
+						break;
+					case Token.STRING:
+						if(resValToStore.iDataType == Token.STRING)
+						{
+							resValToStore = new ResultValue(
+													Token.STRING,
+													new StringBuilder(
+															((StringBuilder) resValToStore.value).toString()	
+														)
+													);	
+						}
+						else if(resValToStore.iDataType == Token.BOOLEAN)
+						{
+							resValToStore = new ResultValue(
+													Token.STRING,
+													new StringBuilder(((Boolean) resValToStore.value).toString())
+												);
+						}
+						else if(resValToStore.iDataType == Token.FLOAT ||
+								resValToStore.iDataType == Token.INTEGER)
+						{
+							resValToStore = new ResultValue(
+													Token.STRING,
+													new StringBuilder(
+															((Numeric) resValToStore.value).stringValue
+														)
+												);
+						}
+						break;
+					case Token.BOOLEAN:
+						if(resValToStore.iDataType == Token.BOOLEAN)
+						{
+							resValToStore = new ResultValue(
+													Token.BOOLEAN,
+													new Boolean(((Boolean) resValToStore.value).booleanValue())
+												);
+									
+						}
+						else
+						{
+							error("cannot convert a " + Token.strSubClassifM[resValToStore.iDataType] + " to a boolean value");
+						}
+						break;
+					default:
+						resValToStore = null;
+						break;
+				}
+				
+				array.put(resValToStore, ((Numeric) indexResVal.value).intValue);
+				scan.getNext();
+			}
+		}
 		System.out.println(array);
 	}
 

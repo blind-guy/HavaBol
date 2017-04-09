@@ -87,4 +87,30 @@ public class HavabolArray
 			return array.get(index);
 		}
 	}
+
+	public void put(ResultValue valToStore, int index)
+	{
+		if((index < 0) || (!isUnbounded && index >= maxSize))
+		{
+			throw new IndexOutOfBoundsException();
+		}
+		else 
+		{
+			if(this.currentMaxIndex < index)
+			{
+				while(this.currentMaxIndex < index)
+				{
+					currentMaxIndex++;
+					array.add(null);
+				}
+				currentMaxIndex++;
+				array.add(valToStore);
+				elem = currentMaxIndex + 1;
+			}
+			else
+			{
+				array.set(index, valToStore);
+			}
+		}
+	}
 }
