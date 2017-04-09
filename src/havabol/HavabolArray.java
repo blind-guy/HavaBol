@@ -59,19 +59,26 @@ public class HavabolArray
 		return ret;
 	}
 	
-	public int getElem()
+	public ResultValue getElem() throws Exception
 	{
-		return this.elem;
+		return new ResultValue(
+						Token.INTEGER,
+						new Numeric(Integer.toString(this.elem), Token.INTEGER)
+				   );
+		
 	}
 	
-	public int getMaxElem()
+	public ResultValue getMaxElem() throws Exception
 	{
-		return this.maxSize;
+		return new ResultValue(
+					Token.INTEGER,
+					new Numeric(Integer.toString(this.maxSize), Token.INTEGER)
+					);
 	}
 	
 	public ResultValue getElement(int index)
 	{
-		if((index < 0) || (!isUnbounded && index > this.currentMaxIndex))
+		if((index < 0) || (!isUnbounded && index >= this.maxSize))
 		{
 			throw new IndexOutOfBoundsException();
 		}
