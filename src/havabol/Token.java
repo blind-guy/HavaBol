@@ -11,6 +11,9 @@ public class Token
     public int iSourceLineNr = 0;
     public int iColPos = 0;
     
+    public int precedence = 0;
+    public int stackPrecedence = 0;
+    
     // Constants for primClassif
     public static final int OPERAND = 2;    // constants, identifier
     public static final int OPERATOR = 3;   // + - * / < > = ! 
@@ -75,6 +78,18 @@ public class Token
     {
         this.tokenStr = value;
         // ??
+        Precedence prec = new Precedence();
+        if (prec.containsKey(value)) 
+        {
+        	precedence = prec.getTokenPrecedence(value);
+        	stackPrecedence = prec.getStackPrecedence(value);
+        }
+        else 
+        {
+        	precedence = 0;
+        	stackPrecedence = 0;
+        }
+        prec = null;
     }
     public Token()
     {
@@ -151,6 +166,8 @@ public class Token
 		scRtToken.subClassif 	= oldToken.subClassif;
 		scRtToken.iColPos		= oldToken.iColPos;
 		scRtToken.iSourceLineNr	= oldToken.iSourceLineNr;
+		scRtToken.precedence	= oldToken.precedence;
+		scRtToken.stackPrecedence = oldToken.stackPrecedence;
 		
 		return scRtToken;
 	}
@@ -210,5 +227,23 @@ public class Token
                 System.out.printf("%02X", (int) ch);
         }    
         System.out.printf("\n");
+    }
+    
+    public void setPrecedence() {
+    	Precedence prec = new Precedence();
+        if (prec.containsKey(tokenStr)) 
+        {
+        	//System.out.println("yes" + tokenStr);
+        	precedence = prec.getTokenPrecedence(tokenStr);
+        	stackPrecedence = prec.getStackPrecedence(tokenStr);
+        	//System.out.println("prec: " + precedence + " stackPrec: " + stackPrecedence);
+        }
+        else 
+        {
+        	//System.out.println("no" + tokenStr);
+        	precedence = 0;
+        	stackPrecedence = 0;
+        }
+        prec = null;
     }
 }      

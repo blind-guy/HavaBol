@@ -395,6 +395,9 @@ public class Scanner
 			token.tokenStr = Character.toString(this.textCharM[this.iColPos]);
 			
 		}
+		// set precedence of token
+		token.setPrecedence();
+		
 		// Increment the column position.
 		this.iColPos++;
 	}
@@ -411,6 +414,9 @@ public class Scanner
 		// Copy the character to our token string.
 		token.tokenStr = Character.toString(this.textCharM[this.iColPos]);
 					
+		// set precedence of token
+		token.setPrecedence();
+				
 		// Increment the column position.
 		this.iColPos++;
 	}

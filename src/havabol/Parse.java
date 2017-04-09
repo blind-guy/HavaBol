@@ -16,11 +16,14 @@ public class Parse
 	// fleshed out but for now it simply maps keys (strings representing variable names)
 	// to Objects (what they represent). Their type can be gathered with instanceof (I think).
 	private HashMap<String, Object> storage;
+	Precedence precedence = null;
 	
 	public Parse(Scanner s)
 	{
 		this.scan = s;
 		this.storage = new HashMap<String, Object>();
+		// set precedence for operators
+		precedence = new Precedence();
 	}
 
 
@@ -490,59 +493,235 @@ public class Parse
 		// GOOD LUCK NICK
 
 		ResultValue res = null;
+		Token popped = null;
 		
-		Stack<ResultValue> operandStack = new Stack<ResultValue>();
-		Stack<String> operatorStack = new Stack<String>();
-//		if (scan.currentToken.primClassif == Token.SEPARATOR)
-//			scan.getNext();
+		ArrayList<Token> postfixExpr = new ArrayList<Token>();
+		Stack<Token> operatorStack = new Stack<Token>();
+		Token lastToken = null;
 		
-
-		while(scan.currentToken.primClassif != Token.SEPARATOR)
-		{
-			res = convertCurrentTokenToResultValue();
-//			if (res != null)
-//				System.out.println(res.toString() + " primClasif " + scan.currentToken.primClassif);
+		// loop while the current token is not a separator (unless it's '(' or ')'
+		// and is not a control token
+		while((scan.currentToken.primClassif != Token.SEPARATOR 
+				&& scan.currentToken.primClassif != Token.CONTROL
+				|| (scan.currentToken.tokenStr.equals("(") || scan.currentToken.tokenStr.equals(")")))
+				) //&& !(scan.currentToken.primClassif != Token.CONTROL))
+		{	
+//			System.out.println("current token: " + scan.currentToken.tokenStr);
+//			System.out.println("stack");
+//			for (Token t : operatorStack)
+//				System.out.print(t.tokenStr + " prec: " + t.precedence);
+//			System.out.println();
+//			
+//			System.out.println("out");
+//			for (Token t : postfixExpr)
+//				System.out.print(t.tokenStr + " ");
+//			System.out.println();
 			
-			if (scan.currentToken.primClassif == Token.OPERAND 
-					|| scan.currentToken.primClassif == Token.IDENTIFIER)
-				operandStack.push(res);
-			else if (scan.currentToken.primClassif == Token.OPERATOR)
-				operatorStack.push(scan.currentToken.tokenStr);
+			if (scan.currentToken.primClassif == Token.OPERAND
+					|| scan.currentToken.primClassif == Token.IDENTIFIER) 
+			{
+				postfixExpr.add(scan.currentToken);
+			}
+			else if (scan.currentToken.primClassif == Token.OPERATOR) 
+			{
+				// if the token is unary minus, change token's precedence
+				if (scan.currentToken.tokenStr.equals("-"))
+				{
+					if (lastToken == null 
+							|| lastToken.primClassif == Token.OPERATOR
+							|| lastToken.primClassif == Token.CONTROL
+							|| (lastToken.primClassif == Token.SEPARATOR
+							&& lastToken.tokenStr.equals("("))) 
+					{
+						scan.currentToken.precedence = precedence.getTokenPrecedence("u-");
+						scan.currentToken.stackPrecedence = precedence.getStackPrecedence("u-");
+					}
+				}
+				// loop while operators of lower precedence are in the stack
+				while (!operatorStack.isEmpty()) 
+				{
+					if (scan.currentToken.precedence > operatorStack.peek().stackPrecedence)
+						break;
+					
+					postfixExpr.add(operatorStack.pop());
+				}
+				operatorStack.push(scan.currentToken);
+			}
+			else if (scan.currentToken.primClassif == Token.SEPARATOR) 
+			{
+				if (scan.currentToken.tokenStr.equals("("))
+					operatorStack.push(scan.currentToken);
+				else if (scan.currentToken.tokenStr.equals(")")) 
+				{
+					boolean bFound = false;
+					while (!operatorStack.isEmpty()) 
+					{
+						popped = operatorStack.pop();
+						//
+//						for (Token t : postfixExpr)
+//							System.out.print(t.tokenStr + " ");
+//						System.out.println();
+//						System.out.println("popped: " + popped.tokenStr);
+						//
+						if (popped.tokenStr.equals("(")) 
+						{
+							bFound = true;
+							break;
+						}
+						postfixExpr.add(popped);
+					}
+					if (!bFound) 
+					{
+						//error("Missing '('");
+						break;
+					}
+				}
+				else 
+				{
+					error("Invalid separator");
+				}
+			}
 			else if (scan.currentToken.primClassif == Token.FUNCTION)
 			{
-				ResultValue temp = callBuiltInFunction(scan.currentToken.tokenStr, exec);
-				if (temp != null)
-					operandStack.push(temp);
+				// take result value from callBuiltInFunction and convert it to a token
+				ResultValue funcResultVal = callBuiltInFunction(scan.currentToken.tokenStr, exec);
+				Token funcResultToken = new Token(funcResultVal.value.toString());
+				funcResultToken.primClassif = Token.OPERAND;
+				funcResultToken.subClassif = funcResultVal.iDataType;
+				postfixExpr.add(funcResultToken);
 			}
+			else 
+			{
+				error("Invalid expression. Expecting operands or operators");
+			}
+			
+			lastToken = scan.currentToken;
 			scan.getNext();
 		}
 		
-		//System.out.println("operand size " + operandStack.size() + " operator size " + operatorStack.size());
-
-		if (operandStack.size() == 1 && operatorStack.size() == 1)
+		while (!operatorStack.isEmpty())
 		{
-			res = (operandStack.pop()).performOperation(null, operatorStack.pop());
-		}	
-		else if (operandStack.size() == 2 && operatorStack.size() == 1) 
-		{
-			ResultValue rightOp = operandStack.pop();
-			ResultValue leftOp = operandStack.pop();
-			res = leftOp.performOperation(rightOp, operatorStack.pop());
+			popped = operatorStack.pop();
+			if (popped.tokenStr.equals("")) 
+				error("Missing ')'");
+			postfixExpr.add(popped);
 		}
-		else if (operandStack.size() == 1)
-			res = operandStack.pop();
-		else
-			error("Improper expression");
+
+//		for (Token t : postfixExpr)
+//			System.out.print(t.tokenStr + " ");
+//		System.out.println();
 		
-		// Call get next to eat the very last separator.
-		//scan.getNext();
+		Stack<ResultValue> resultStack = new Stack<ResultValue>();
+		ResultValue rightOpResVal, leftOpResVal, endResVal;
+		Token tempTok;
+		
+		for (int i=0; i<postfixExpr.size(); i++)
+		{
+			tempTok = postfixExpr.get(i);
+			//System.out.println("token: " + tempTok.tokenStr);
+			if (tempTok.primClassif == Token.OPERAND || tempTok.primClassif == Token.IDENTIFIER)
+			{
+				//endResVal = convertGivenTokenToResultValue(tempTok);
+				endResVal = getValueOfToken(tempTok);
+				
+				resultStack.push(endResVal);
+			}
+			else if (tempTok.primClassif == Token.OPERATOR)
+			{
+				// precedence of 12 indicates unary minus
+				if (tempTok.tokenStr.equals("not") || tempTok.precedence == 12)
+				{
+					if (resultStack.isEmpty())
+						error("Invalid expression");
+					
+					rightOpResVal = resultStack.pop();
+					resultStack.push(rightOpResVal.performOperation(null, tempTok.tokenStr));
+				}
+				else 
+				{
+					if (resultStack.size() < 2)
+						error("Invalid expression");
+					
+					rightOpResVal = resultStack.pop();
+					leftOpResVal = resultStack.pop();
+					resultStack.push(leftOpResVal.performOperation(rightOpResVal, tempTok.tokenStr));
+				}
+			}
+			else
+			{
+				error("Invalid expression. Expected operands or operators in expression.");
+			}
+		}
 
 		if(scan.dBug.bShowExpr)
 		{
 			System.out.println("EVALUATION OF EXPRESSION RETURNED: \n\t" + res);
 		}
+		
+		if (resultStack.size() != 1)
+			error("Invalid expression.");
+		else
+			res = resultStack.pop();
+		//System.out.println(res.toString());
+		
 		return res;
 	}
+	
+	/**
+	 * Converts given token to result value
+	 * @return ResultValue corresponding to token type
+	 * @throws Exception
+	 */
+//	private ResultValue convertGivenTokenToResultValue(Token token) throws Exception
+//	{
+//		STIdentifier identifier = null;
+//		ResultValue res = null;
+//		if(scan.currentToken.primClassif == Token.IDENTIFIER)
+//		{	
+//			identifier = (STIdentifier) scan.symbolTable.getEntry(token.tokenStr);
+//			if(identifier == null)
+//			{
+//				error("variable is undeclared or undefined in this scope");
+//			}
+//			res = new ResultValue(token.subClassif, storage.get(token.tokenStr));
+//			//res = new ResultValue(identifier.dclType, storage.get(scan.currentToken.tokenStr));
+//		}
+//		else if(token.primClassif == Token.OPERAND)
+//		{
+//			switch(token.subClassif)
+//			{
+//				case Token.INTEGER:
+//					res = new ResultValue(token.subClassif, new Numeric(token.tokenStr, Token.INTEGER));
+//					break;
+//				case Token.FLOAT:
+//					res = new ResultValue(token.subClassif, new Numeric(token.tokenStr, Token.FLOAT));
+//					break;
+//				case Token.BOOLEAN:
+//					if(token.tokenStr.equals("T"))
+//					{
+//						res = new ResultValue(token.subClassif, new Boolean(true));
+//					}
+//					else if(token.tokenStr.equals("F"))
+//					{
+//						res = new ResultValue(token.subClassif, new Boolean(false));
+//					}
+//					else
+//					{
+//						error("token's primClassif is OPERAND and subClassif is BOOLEAN but " +
+//							"tokenStr " + scan.currentToken.tokenStr + " could not be resolved " +
+//							"to a boolean value");
+//					}
+//					break;
+//				case Token.STRING:
+//					res = new ResultValue(token.subClassif, new StringBuilder(token.tokenStr));
+//					break;
+//				default:
+//					error("operand is of unhandled type");
+//			}
+//		}
+//
+//		return res;
+//	}
 
 	/**
 	 * This converts the current token to a result value and increments the scanner.
@@ -959,10 +1138,15 @@ public class Parse
 				//System.out.println("loop " + scan.currentToken.tokenStr);
 				results.add(expr(exec));
 				
+//				if (scan.currentToken.tokenStr.equals(";"))
+//					break;
+				
 				if (scan.currentToken.tokenStr.equals(")"))
 					parenthesisCounter--;
 				else if (scan.currentToken.tokenStr.equals("("))
 					parenthesisCounter++;
+				
+				//System.out.println("print current token: " + scan.currentToken.tokenStr);
 				scan.getNext();
 			}
 		}
@@ -999,13 +1183,12 @@ public class Parse
 			System.out.println();
 		}
 		
+		//System.out.println("print current token: " + scan.currentToken.tokenStr);
 		
-		if (scan.currentToken.tokenStr.equals(";"))
-		{
-			scan.getNext();
-		}
-		else
+		if (!scan.currentToken.tokenStr.equals(";"))
 			error("No semicolon at the end of this line");
+		
+		scan.getNext();
 	}
 	
 	private void incrementScope()
