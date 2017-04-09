@@ -232,6 +232,7 @@ public class Parse
 					array.maxSize = Integer.parseInt(((Numeric) sizeResVal.value).stringValue);
 				}
 			}
+			
 			if(scan.currentToken.primClassif != Token.SEPARATOR || 
 			   !scan.currentToken.tokenStr.equals("]"))
 			{
@@ -286,11 +287,6 @@ public class Parse
 					
 					arrayIndex++;
 					ResultValue resValToStore = expr(bFlag);
-					System.out.println(resValToStore);
-					
-					// TODO: convert current result value to something
-					// we can store.
-					
 					switch(array.dclType)
 					{
 						case Token.INTEGER:
@@ -300,12 +296,20 @@ public class Parse
 							}
 							else if(resValToStore.iDataType == Token.INTEGER)
 							{
-								array.unsafeAppend(resValToStore);
+								resValToStore = new ResultValue(
+														resValToStore.iDataType,
+														new Numeric(
+																((Numeric) resValToStore.value).stringValue,
+																resValToStore.iDataType
+															)
+														);
 							}
 							else if(resValToStore.iDataType == Token.FLOAT)
 							{
-								resValToStore = new ResultValue(Token.INTEGER, "" + ((Numeric) resValToStore.value).intValue);
-								array.unsafeAppend(resValToStore);
+								resValToStore = new ResultValue(
+														Token.INTEGER, 
+														"" + ((Numeric) resValToStore.value).intValue
+													);
 							}
 							else if(resValToStore.iDataType == Token.STRING)
 							{
@@ -320,9 +324,6 @@ public class Parse
 																Token.INTEGER
 															).intValue
 														);
-								array.unsafeAppend(resValToStore);
-								
-								System.out.println(resValToStore);
 							}
 							break;
 						case Token.FLOAT:
@@ -332,12 +333,17 @@ public class Parse
 							}
 							else if(resValToStore.iDataType == Token.FLOAT)
 							{
-								array.unsafeAppend(resValToStore);
+								resValToStore = new ResultValue(
+													resValToStore.iDataType,
+													new Numeric(
+															((Numeric) resValToStore.value).stringValue,
+															resValToStore.iDataType
+														)
+													);
 							}
 							else if(resValToStore.iDataType == Token.INTEGER)
 							{
 								resValToStore = new ResultValue(Token.FLOAT, "" + ((Numeric) resValToStore.value).doubleValue);
-								array.unsafeAppend(resValToStore);
 							}
 							else if(resValToStore.iDataType == Token.STRING)
 							{
@@ -352,20 +358,55 @@ public class Parse
 																Token.FLOAT
 															).doubleValue
 														);
-								array.unsafeAppend(resValToStore);
-								
-								System.out.println(resValToStore);
 							}
 							break;
 						case Token.STRING:
-							
+							if(resValToStore.iDataType == Token.STRING)
+							{
+								resValToStore = new ResultValue(
+														Token.STRING,
+														new StringBuilder(
+																((StringBuilder) resValToStore.value).toString()	
+															)
+														);	
+							}
+							else if(resValToStore.iDataType == Token.BOOLEAN)
+							{
+								resValToStore = new ResultValue(
+														Token.STRING,
+														new StringBuilder(((Boolean) resValToStore.value).toString())
+													);
+							}
+							else if(resValToStore.iDataType == Token.FLOAT ||
+									resValToStore.iDataType == Token.INTEGER)
+							{
+								resValToStore = new ResultValue(
+														Token.STRING,
+														new StringBuilder(
+																((Numeric) resValToStore.value).stringValue
+															)
+													);
+							}
 							break;
 						case Token.BOOLEAN:
-							
+							if(resValToStore.iDataType == Token.BOOLEAN)
+							{
+								resValToStore = new ResultValue(
+														Token.BOOLEAN,
+														new Boolean(((Boolean) resValToStore.value).booleanValue())
+													);
+										
+							}
+							else
+							{
+								error("cannot convert a " + Token.strSubClassifM[resValToStore.iDataType] + " to a boolean value");
+							}
 							break;
 						default:
+							resValToStore = null;
 							break;
-					}			
+					}
+					array.unsafeAppend(resValToStore);
 					if(scan.currentToken.primClassif == Token.SEPARATOR &&
 					   scan.currentToken.tokenStr.equals(","))
 					{
@@ -391,6 +432,7 @@ public class Parse
 				return;
 			}
 		}
+		System.out.println(array);
 	}
 
 
