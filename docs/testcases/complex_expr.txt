@@ -1,4 +1,5 @@
 Int i;
+String hi = "hi there";
 i = 4 + (5 - 6) * 2;
 print("i = " # "4 + (5 " # "- 6) " # "* 2");
 print("i+2 i+i: ", i+2, i+i);
@@ -7,3 +8,10 @@ print("i+2 >= 2:", (i+2) >= 2);
 print("2 <= i+2:", 2 <= i+2);
 i = i ^ i;
 print("\"\" # i^4.5  == 256", "" # i^4.5 == 256);
+print(hi);
+i = LENGTH(hi);
+print("LENGTH(\"hi there\") =", i, "or", LENGTH("hi there"));
+print(LENGTH(hi) == LENGTH(hi) and T);
+print(hi, "only contains spaces or is empty:", SPACES(hi));
+print(" 	", "only contains spaces or is empty:", SPACES(" 	"));
+print("", "only contains spaces or is empty:", SPACES("") and T);

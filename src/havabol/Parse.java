@@ -100,14 +100,13 @@ public class Parse
 					parseDebugStmt();
 					break;
 				case Token.FUNCTION:
-					if (this.scan.currentToken.tokenStr.equals("print")) 
-					{
-						callBuiltInFunction("print", bFlag);
-					}
-					else
-					{
-						scan.getNext(); // at present, not handling case of other functions	
-					}
+					
+					callBuiltInFunction(bFlag);
+					
+//					else
+//					{
+//						scan.getNext(); // at present, not handling case of other functions	
+//					}
 					break;
 				// TODO: for now we assume any IDENTIFIER at the beginning of a statement
 				// means we are doing an assignment.
@@ -584,10 +583,11 @@ public class Parse
 			else if (scan.currentToken.primClassif == Token.FUNCTION)
 			{
 				// take result value from callBuiltInFunction and convert it to a token
-				ResultValue funcResultVal = callBuiltInFunction(scan.currentToken.tokenStr, exec);
+				ResultValue funcResultVal = callBuiltInFunction(exec);
 				Token funcResultToken = new Token(funcResultVal.value.toString());
 				funcResultToken.primClassif = Token.OPERAND;
 				funcResultToken.subClassif = funcResultVal.iDataType;
+				//System.out.println("subClassif " + funcResultVal.iDataType);
 				postfixExpr.add(funcResultToken);
 			}
 			else 
@@ -622,6 +622,7 @@ public class Parse
 			if (tempTok.primClassif == Token.OPERAND || tempTok.primClassif == Token.IDENTIFIER)
 			{
 				//endResVal = convertGivenTokenToResultValue(tempTok);
+				//System.out.println(tempTok.tokenStr + " " + tempTok.subClassif);
 				endResVal = getValueOfToken(tempTok);
 				
 				resultStack.push(endResVal);
@@ -666,62 +667,6 @@ public class Parse
 		
 		return res;
 	}
-	
-	/**
-	 * Converts given token to result value
-	 * @return ResultValue corresponding to token type
-	 * @throws Exception
-	 */
-//	private ResultValue convertGivenTokenToResultValue(Token token) throws Exception
-//	{
-//		STIdentifier identifier = null;
-//		ResultValue res = null;
-//		if(scan.currentToken.primClassif == Token.IDENTIFIER)
-//		{	
-//			identifier = (STIdentifier) scan.symbolTable.getEntry(token.tokenStr);
-//			if(identifier == null)
-//			{
-//				error("variable is undeclared or undefined in this scope");
-//			}
-//			res = new ResultValue(token.subClassif, storage.get(token.tokenStr));
-//			//res = new ResultValue(identifier.dclType, storage.get(scan.currentToken.tokenStr));
-//		}
-//		else if(token.primClassif == Token.OPERAND)
-//		{
-//			switch(token.subClassif)
-//			{
-//				case Token.INTEGER:
-//					res = new ResultValue(token.subClassif, new Numeric(token.tokenStr, Token.INTEGER));
-//					break;
-//				case Token.FLOAT:
-//					res = new ResultValue(token.subClassif, new Numeric(token.tokenStr, Token.FLOAT));
-//					break;
-//				case Token.BOOLEAN:
-//					if(token.tokenStr.equals("T"))
-//					{
-//						res = new ResultValue(token.subClassif, new Boolean(true));
-//					}
-//					else if(token.tokenStr.equals("F"))
-//					{
-//						res = new ResultValue(token.subClassif, new Boolean(false));
-//					}
-//					else
-//					{
-//						error("token's primClassif is OPERAND and subClassif is BOOLEAN but " +
-//							"tokenStr " + scan.currentToken.tokenStr + " could not be resolved " +
-//							"to a boolean value");
-//					}
-//					break;
-//				case Token.STRING:
-//					res = new ResultValue(token.subClassif, new StringBuilder(token.tokenStr));
-//					break;
-//				default:
-//					error("operand is of unhandled type");
-//			}
-//		}
-//
-//		return res;
-//	}
 
 	/**
 	 * This converts the current token to a result value and increments the scanner.
@@ -1110,12 +1055,21 @@ public class Parse
 	}
 	
 
-	private ResultValue callBuiltInFunction(String func, boolean bFlag) throws Exception
+	private ResultValue callBuiltInFunction(boolean bFlag) throws Exception
 	{
-		if (func.equals("print"))
+		if (scan.currentToken.tokenStr.equals("print"))
 		{
 			print(bFlag);
 			return null;
+		}
+		else if (scan.currentToken.tokenStr.equals("LENGTH"))
+		{
+			return length(bFlag);
+		}
+		else if (scan.currentToken.tokenStr.equals("SPACES"))
+		{
+			return spaces(bFlag);
+			//return length(bFlag);
 		}
 		
 		return new ResultValue();
@@ -1178,8 +1132,12 @@ public class Parse
 		//System.out.println("results size " + results.size());
 		
 		if (exec == true) {
-			for (ResultValue rs : results)
+			for (ResultValue rs : results) 
+			{
+				if (rs == null)
+					error("Cannot print null value");
 				System.out.print(rs.value.toString().concat(" "));
+			}
 			System.out.println();
 		}
 		
@@ -1189,6 +1147,120 @@ public class Parse
 			error("No semicolon at the end of this line");
 		
 		scan.getNext();
+	}
+	
+	private ResultValue length(boolean exec) throws Exception {
+		scan.getNext();
+		
+		int parenthesisCounter = 0;
+		if (!scan.currentToken.tokenStr.equals("("))
+			error("Missing left parenthesis for LENGTH function");
+		parenthesisCounter++;
+		ResultValue param, result = null;
+		scan.getNext();
+		
+		if (exec == true) 
+		{
+			param = expr(exec);
+			//System.out.println(scan.currentToken.tokenStr);
+			if (!scan.currentToken.tokenStr.equals(")"))
+				error("Missing right parenthesis for LENGTH function");
+			else if (param.iDataType != Token.STRING)
+				error("LENGTH only takes String arguments");
+			result = new ResultValue(Token.INTEGER, (param.value.toString()).length());
+		}
+		else 
+		{
+			while (parenthesisCounter > 0)
+			{
+				if (scan.currentToken.tokenStr.equals(";"))
+					error("Malformed LENGTH statement");
+				
+				if (scan.currentToken.tokenStr.equals(")"))
+					parenthesisCounter--;
+				else if (scan.currentToken.tokenStr.equals("("))
+					parenthesisCounter++;
+				if (scan.currentToken.primClassif == Token.SEPARATOR
+						&& scan.nextToken.primClassif == Token.SEPARATOR)
+				{
+					if (!scan.currentToken.tokenStr.equals(")")
+							&& scan.nextToken.tokenStr.equals(";"))
+					{
+						error("No argument betweeen " + scan.currentToken.tokenStr
+								+ scan.nextToken.tokenStr);
+					}
+				}
+				
+				scan.getNext();
+			}
+		}
+		//System.out.println(result.iDataType + " " + result.toString());
+		
+		return result;
+	}
+	
+	private ResultValue spaces(boolean exec) throws Exception {
+		scan.getNext();
+		
+		int parenthesisCounter = 0;
+		if (!scan.currentToken.tokenStr.equals("("))
+			error("Missing left parenthesis for SPACES function");
+		parenthesisCounter++;
+		ResultValue param, result = null;
+		scan.getNext();
+		
+		if (exec == true) 
+		{
+			param = expr(exec);
+			//System.out.println(scan.currentToken.tokenStr);
+			if (!scan.currentToken.tokenStr.equals(")"))
+				error("Missing right parenthesis for SPACES function");
+			else if (param.iDataType != Token.STRING)
+				error("LENGTH only takes String arguments");
+			boolean containsSpaces = true;
+			String val = param.value.toString();
+			for (int i=0; i<val.length(); i++)
+			{
+				//System.out.print("'" + val.charAt(i) + "'");
+				if (val.charAt(i) != ' ' && val.charAt(i) != '\t' && val.charAt(i) != '\n')
+				{
+					containsSpaces = false;
+				}
+			}
+			
+			if (containsSpaces)
+				result = new ResultValue(Token.BOOLEAN, "T");
+			else
+				result = new ResultValue(Token.BOOLEAN, "F");
+		}
+		else 
+		{
+			while (parenthesisCounter > 0)
+			{
+				if (scan.currentToken.tokenStr.equals(";"))
+					error("Malformed LENGTH statement");
+				
+				if (scan.currentToken.tokenStr.equals(")"))
+					parenthesisCounter--;
+				else if (scan.currentToken.tokenStr.equals("("))
+					parenthesisCounter++;
+				if (scan.currentToken.primClassif == Token.SEPARATOR
+						&& scan.nextToken.primClassif == Token.SEPARATOR)
+				{
+					if (!scan.currentToken.tokenStr.equals(")")
+							&& scan.nextToken.tokenStr.equals(";"))
+					{
+						error("No argument betweeen " + scan.currentToken.tokenStr
+								+ scan.nextToken.tokenStr);
+					}
+				}
+				
+				scan.getNext();
+			}
+		}
+		//System.out.println(result.iDataType + " " + result.toString());
+		
+		return result;
 	}
 	
 	private void incrementScope()

@@ -23,7 +23,7 @@ public class ResultValue {
 			}
 			else
 			{
-				value = new Numeric((String) val, type);
+				value = new Numeric(val.toString(), type);
 			}
 			//numValue = new Numeric(val.toString(), type);
 			isNum = true;
