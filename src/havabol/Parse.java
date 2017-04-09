@@ -119,20 +119,14 @@ public class Parse
 				// For now we follow the pattern of any identifier not followed by a separator
 				// is an assignment.
 				case Token.IDENTIFIER:
-					// TODO: this might not be quite right but I need to not
-					// call this on statements such as:
-					//
-					// var; 
-					// // this could be valid syntax even though it does nothing
-					if(scan.nextToken.primClassif != Token.SEPARATOR )
+					if(scan.nextToken.primClassif == Token.SEPARATOR && 
+					   scan.nextToken.tokenStr.equals("["))
 					{
-						// System.out.println("FOUND TOKEN FOR ASSIGNMENT");
-						assignmentStmt(bFlag);
+						arrayAssignmentStmt(bFlag);
 					}
 					else
 					{
-						// TODO: remove once all IDENTIFIER cases are handled
-						scan.getNext();
+						assignmentStmt(bFlag);
 					}
 					break;
 				// Check to see if we have an unclassified identifier. It's fair to say this
@@ -158,8 +152,289 @@ public class Parse
 		returnVal.terminatingStr = scan.currentToken.tokenStr;
 		returnVal.value = scan.currentToken;
 		returnVal.iDataType = scan.currentToken.subClassif;
+
 		return returnVal;
 	}
+
+	/**
+	 * Handle complex array assignments including determining if this
+	 * is a single value or full array assignment.
+	 * 
+	 * The logic here is as follows:
+	 * 		-if the current identifier maps to a declared array maxSize > 0
+	 * 		 then we are making a single variable assignment to some index
+	 *       within the array
+	 *      -else if the array size is not > 0, this array is uninitialized
+	 *       and we must be either initializing its size and/or assigning values
+	 * @throws Exception 
+	 */
+	private void arrayAssignmentStmt(boolean bFlag) throws Exception 
+	{
+		// Get the STEntry and storage objects for the array.
+		STEntry stEntry = scan.symbolTable.getEntry(scan.currentToken.tokenStr);
+		STIdentifier stIdentifier = null;
+		Object stObject = storage.get(scan.currentToken.tokenStr);
+		HavabolArray array = null;
+		ResultValue sizeResVal = null;
+		int arrayIndex = -1;
+		
+		// If either of these are empty, there is an error.
+		if(stEntry == null)
+		{
+			error("attempting to make an assignment with an undeclared variable");
+		}
+		if(stObject == null)
+		{
+			error("attempting to make an assignment using an undeclared varaible");
+		}
+		
+		// Make sure the STEntry is an identifier and the storage object
+		// is an ArrayList
+		if(!(stEntry instanceof STIdentifier))
+		{
+			error("symbol table for this token is not an identifier");
+		}
+		if((((STIdentifier) stEntry).structure != HavabolStructureType.ARRAY) ||
+		   (!(stObject instanceof HavabolArray)))
+		{
+			error("this variable was not instantiated as an array");
+		}
+		stIdentifier = (STIdentifier) stEntry;
+		array = (HavabolArray) stObject;
+		
+		// Check to see if the stEntry and storage object types are correct.
+		if(stIdentifier.dclType != array.dclType)
+		{
+			error("identifier and array type do not match");
+		}
+
+		// Now to start doing the work.
+		
+		// If the array size is not set, we are at the very least doing
+		// an initialization.
+		if(array.maxSize == 0)
+		{
+			// We are still on our identifier.
+			scan.getNext();
+			scan.getNext();
+			
+			// If the current token is not a separator, we expect an expression.
+			if(!(scan.currentToken.primClassif == Token.SEPARATOR &&
+		       scan.currentToken.tokenStr.equals("]")))
+			{
+				sizeResVal = expr(bFlag);
+				if(sizeResVal.iDataType != Token.INTEGER)
+				{
+					error("size expression expects type INT, type given is " + Token.strSubClassifM[sizeResVal.iDataType]);
+				}
+				else
+				{
+					array.maxSize = Integer.parseInt(((Numeric) sizeResVal.value).stringValue);
+				}
+			}
+			
+			if(scan.currentToken.primClassif != Token.SEPARATOR || 
+			   !scan.currentToken.tokenStr.equals("]"))
+			{
+				scan.currentToken.printToken();
+				error("invalid expression given for array size");
+			}
+			scan.getNext();
+			
+			
+			// If the array size was set to an invalid integer value or
+			// is still zero and we are not inferring its size, we should
+			// print an appropriate error message.
+			if(array.maxSize < 0)
+			{
+				error("array size cannot be negative");
+			}
+			else if(array.maxSize == 0)
+			{
+				if(scan.currentToken.primClassif != Token.OPERATOR &&
+				   !scan.currentToken.tokenStr.equals("="))
+				{
+					error("array must be declared with a fixed size or be given an assignment");
+				}
+			}
+			
+			// If we're at an operator, we must start doing assignments
+			// otherwise we must be at a semicolon and can return.
+			if(scan.currentToken.primClassif == Token.OPERATOR)
+			{
+				if(!scan.currentToken.tokenStr.equals("="))
+				{
+					error("invalid assignment operator made in array assignment");
+				}
+				scan.getNext();
+				
+				
+				while(true)
+				{
+					if(scan.currentToken.primClassif == Token.SEPARATOR &&
+					   scan.currentToken.tokenStr.equals(";"))
+					{
+						break;
+					}
+					else if(scan.currentToken.primClassif == Token.SEPARATOR &&
+							scan.currentToken.tokenStr.equals(","))
+					{
+						arrayIndex++;
+						array.unsafeAppend(null);
+						scan.getNext();
+						continue;
+					}
+					
+					arrayIndex++;
+					ResultValue resValToStore = expr(bFlag);
+					switch(array.dclType)
+					{
+						case Token.INTEGER:
+							if(resValToStore.iDataType == Token.BOOLEAN)
+							{
+								error("cannot convert Bool to integer type");
+							}
+							else if(resValToStore.iDataType == Token.INTEGER)
+							{
+								resValToStore = new ResultValue(
+														resValToStore.iDataType,
+														new Numeric(
+																((Numeric) resValToStore.value).stringValue,
+																resValToStore.iDataType
+															)
+														);
+							}
+							else if(resValToStore.iDataType == Token.FLOAT)
+							{
+								resValToStore = new ResultValue(
+														Token.INTEGER, 
+														"" + ((Numeric) resValToStore.value).intValue
+													);
+							}
+							else if(resValToStore.iDataType == Token.STRING)
+							{
+								// convert the string to an integer if possible
+								resValToStore = new ResultValue(
+														Token.INTEGER, 
+														"" + new Numeric(
+																"" + new Numeric(
+																		((StringBuilder) resValToStore.value).toString(), 
+																		Token.FLOAT
+																	).intValue,
+																Token.INTEGER
+															).intValue
+														);
+							}
+							break;
+						case Token.FLOAT:
+							if(resValToStore.iDataType == Token.BOOLEAN)
+							{
+								error("cannot convert Bool to float type");
+							}
+							else if(resValToStore.iDataType == Token.FLOAT)
+							{
+								resValToStore = new ResultValue(
+													resValToStore.iDataType,
+													new Numeric(
+															((Numeric) resValToStore.value).stringValue,
+															resValToStore.iDataType
+														)
+													);
+							}
+							else if(resValToStore.iDataType == Token.INTEGER)
+							{
+								resValToStore = new ResultValue(Token.FLOAT, "" + ((Numeric) resValToStore.value).doubleValue);
+							}
+							else if(resValToStore.iDataType == Token.STRING)
+							{
+								// convert the string to an integer if possible
+								resValToStore = new ResultValue(
+														Token.FLOAT, 
+														"" + new Numeric(
+																"" + new Numeric(
+																		((StringBuilder) resValToStore.value).toString(), 
+																		Token.FLOAT
+																	).doubleValue,
+																Token.FLOAT
+															).doubleValue
+														);
+							}
+							break;
+						case Token.STRING:
+							if(resValToStore.iDataType == Token.STRING)
+							{
+								resValToStore = new ResultValue(
+														Token.STRING,
+														new StringBuilder(
+																((StringBuilder) resValToStore.value).toString()	
+															)
+														);	
+							}
+							else if(resValToStore.iDataType == Token.BOOLEAN)
+							{
+								resValToStore = new ResultValue(
+														Token.STRING,
+														new StringBuilder(((Boolean) resValToStore.value).toString())
+													);
+							}
+							else if(resValToStore.iDataType == Token.FLOAT ||
+									resValToStore.iDataType == Token.INTEGER)
+							{
+								resValToStore = new ResultValue(
+														Token.STRING,
+														new StringBuilder(
+																((Numeric) resValToStore.value).stringValue
+															)
+													);
+							}
+							break;
+						case Token.BOOLEAN:
+							if(resValToStore.iDataType == Token.BOOLEAN)
+							{
+								resValToStore = new ResultValue(
+														Token.BOOLEAN,
+														new Boolean(((Boolean) resValToStore.value).booleanValue())
+													);
+										
+							}
+							else
+							{
+								error("cannot convert a " + Token.strSubClassifM[resValToStore.iDataType] + " to a boolean value");
+							}
+							break;
+						default:
+							resValToStore = null;
+							break;
+					}
+					array.unsafeAppend(resValToStore);
+					if(scan.currentToken.primClassif == Token.SEPARATOR &&
+					   scan.currentToken.tokenStr.equals(","))
+					{
+						scan.getNext();
+					}
+				}
+				if(array.maxSize == 0)
+				{
+					array.maxSize = arrayIndex + 1;
+				}
+				else if(array.maxSize < arrayIndex + 1)
+				{
+					error("assigned more values to array than its declared size");
+				}
+			}
+			else if(scan.currentToken.primClassif != Token.SEPARATOR ||
+					!scan.currentToken.tokenStr.equals(";"))
+			{
+				error("invalid array declaration expression");
+			}
+			else
+			{
+				return;
+			}
+		}
+		System.out.println(array);
+	}
+
 
 	private void reclassifyCurrentTokenIdentifier() throws ParserException
 	{
@@ -853,17 +1128,31 @@ public class Parse
 		}
 		stEntry.nonLocal = localScope;
 		
-		if(bFlag)
-		{
-			storage.put(scan.nextToken.tokenStr, stObject);
-			scan.symbolTable.putSymbol(scan.nextToken.tokenStr, stEntry);
-		}
-		
 		// Set the next token and update its prime and sub-classifications now that we've
 		// identified it (necessary for in-line assignments like: Int foo = 4;)
 		scan.nextToken.primClassif = stEntry.primClassif;
 		scan.nextToken.subClassif = stEntry.dclType;
 		scan.getNext();
+		
+		// Save key from current token.
+		String key = scan.currentToken.tokenStr;
+		
+		// Check to see if we're at an array and if so, change the stObject
+		// and entry.
+		if(scan.nextToken.primClassif == Token.SEPARATOR &&
+		   scan.nextToken.tokenStr.equals("["))
+		{
+			stEntry.structure = HavabolStructureType.ARRAY;
+			stObject = new HavabolArray(stEntry.dclType);
+		}
+		
+		if(bFlag)
+		{
+			storage.put(key, stObject);
+			scan.symbolTable.putSymbol(key, stEntry);
+		}
+		
+
 		return true;
 	}
 	

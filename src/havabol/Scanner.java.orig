@@ -395,10 +395,12 @@ public class Scanner
 			token.tokenStr = Character.toString(this.textCharM[this.iColPos]);
 			
 		}
-
+<<<<<<< HEAD
+=======
 		// set precedence of token
 		token.setPrecedence();
-
+>>>>>>> d14cfc9c34f1ae6b5c3469c1e306d9a2a1d95275
+		
 		// Increment the column position.
 		this.iColPos++;
 	}

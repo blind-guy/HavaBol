@@ -12,7 +12,7 @@ public class STIdentifier extends STEntry
 	public int dclType;
 	
 	// The data structure type for this STIdentifier.
-	public int structure;
+	public HavabolStructureType structure = HavabolStructureType.PRIMITIVE;
 	
 	// The parameter type.
 	public int parm;
