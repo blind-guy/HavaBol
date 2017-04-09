@@ -1090,6 +1090,11 @@ public class Parse
 			stEntry.structure = HavabolStructureType.ARRAY;
 			stObject = new HavabolArray(stEntry.dclType);
 		}
+		else if(scan.nextToken.primClassif == Token.SEPARATOR &&
+				scan.nextToken.tokenStr.equals(";"))
+		{
+			scan.getNext();
+		}
 		
 		if(bFlag)
 		{
