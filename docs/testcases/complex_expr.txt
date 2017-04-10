@@ -21,3 +21,4 @@ print("hi[1]", hi[1]);
 print(hi[5]#hi[6]#hi[7], hi[3]#hi[4]#hi[5], hi[6]#hi[1]#hi[3]#hi[5], hi[1], hi[0]#hi[1]#hi[5]);
 String hilo = hi[-1]#hi[-2]#hi[-3]#hi[-4]#hi[-5];
 print(hilo);
+print("ELEM(array):", ELEM(array), "MAXELEM(array):", MAXELEM(array));
