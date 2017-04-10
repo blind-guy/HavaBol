@@ -113,4 +113,28 @@ public class HavabolArray
 			}
 		}
 	}
+
+	public void setAll(ResultValue valToSet)
+	{
+		int index = 0;
+		this.array = new ArrayList<ResultValue>();
+		if(!this.isUnbounded)
+		{
+			while(index < maxSize)
+			{
+				this.array.add(valToSet);
+				index++;
+			}
+			this.currentMaxIndex = index -1 ;
+			this.elem = index;
+		}
+		else
+		{
+			while(index <= currentMaxIndex)
+			{
+				this.array.add(valToSet);
+				index++;
+			}
+		}
+	}
 }

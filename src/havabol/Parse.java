@@ -651,6 +651,17 @@ public class Parse
 			storage.put(key, valueToStore);
 			res = new ResultValue(stEntry.dclType, valueToStore);
 		}
+		else if(storedObject instanceof HavabolArray)
+		{
+			if(res2.value instanceof HavabolArray)
+			{
+				System.out.println(res2.value);
+				System.out.println("BINGO");
+				System.exit(0);
+			}
+			ResultValue convertedVal = ResultValue.convertType(((HavabolArray) storedObject).dclType, res2);
+			((HavabolArray) storedObject).setAll(convertedVal);
+		}
 		else
 		{
 			/**System.out.println("CURRENT KEY WHICH FAILED LOOKUP: " + key);

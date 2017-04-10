@@ -26,4 +26,15 @@ print("F", iFM[iSimp-1], iFM[iFM[6]], iFM[(iSimp+2)-1]/10, iFM[iFM[(iSimp+2)-1]/
     , iFM[2*4], iFM[2+iFM[2*4]-1]);
 // BM[iBM[0]-8]);
 print("iAM originally does not have any elements");
-Int iAM[10];
+String fooStrArray[10];
+fooStrArray = "Hello World!";
+print(fooStrArray[0], fooStrArray[9]);
+
+Int fooIntArray[10];
+fooIntArray = "10";
+print(fooIntArray[0] + fooIntArray[9]);
+
+Int arrAssTestSource[] = 1, 2, 3, 4, 5;
+Int arrAssTestTarget[3];
+
+
