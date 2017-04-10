@@ -1423,6 +1423,14 @@ public class Parse
 			return spaces(bFlag);
 			//return length(bFlag);
 		}
+		else if (scan.currentToken.tokenStr.equals("ELEM"))
+		{
+			return elem(bFlag);
+		}
+		else if (scan.currentToken.tokenStr.equals("MAXELEM"))
+		{
+			return maxElem(bFlag);
+		}
 		
 		return new ResultValue();
 	}
@@ -1611,6 +1619,110 @@ public class Parse
 			}
 		}
 		//System.out.println(result.iDataType + " " + result.toString());
+		
+		return result;
+	}
+	
+	private ResultValue elem(boolean exec) throws Exception 
+	{
+		scan.getNext();
+		int parenthesisCounter = 0;
+		if (!scan.currentToken.tokenStr.equals("("))
+			error("Missing left parenthesis for ELEM function");
+		parenthesisCounter++;
+		ResultValue result = null;
+		scan.getNext();
+		
+		if (exec == true) 
+		{
+			result = convertCurrentTokenToResultValue();
+			if (result.value instanceof HavabolArray) 
+			{
+				scan.getNext();
+				if (!scan.currentToken.tokenStr.equals(")"))
+					error("Missing right parenthesis for ELEM function");
+				return ((HavabolArray) result.value).getElem();
+			}
+			else
+				error("ELEM function takes an array as an argument");
+		}
+		else 
+		{
+			while (parenthesisCounter > 0)
+			{
+				if (scan.currentToken.tokenStr.equals(";"))
+					error("Malformed LENGTH statement");
+				
+				if (scan.currentToken.tokenStr.equals(")"))
+					parenthesisCounter--;
+				else if (scan.currentToken.tokenStr.equals("("))
+					parenthesisCounter++;
+				if (scan.currentToken.primClassif == Token.SEPARATOR
+						&& scan.nextToken.primClassif == Token.SEPARATOR)
+				{
+					if (!scan.currentToken.tokenStr.equals(")")
+							&& scan.nextToken.tokenStr.equals(";"))
+					{
+						error("No argument betweeen " + scan.currentToken.tokenStr
+								+ scan.nextToken.tokenStr);
+					}
+				}
+				
+				scan.getNext();
+			}
+		}
+		
+		return result;
+	}
+	
+	private ResultValue maxElem(boolean exec) throws Exception 
+	{
+		scan.getNext();
+		int parenthesisCounter = 0;
+		if (!scan.currentToken.tokenStr.equals("("))
+			error("Missing left parenthesis for MAXELEM function");
+		parenthesisCounter++;
+		ResultValue result = null;
+		scan.getNext();
+		
+		if (exec == true) 
+		{
+			result = convertCurrentTokenToResultValue();
+			if (result.value instanceof HavabolArray) 
+			{
+				scan.getNext();
+				if (!scan.currentToken.tokenStr.equals(")"))
+					error("Missing right parenthesis for MAXELEM function");
+				return ((HavabolArray) result.value).getMaxElem();
+			}
+			else
+				error("MAXELEM function takes an array as an argument");
+		}
+		else 
+		{
+			while (parenthesisCounter > 0)
+			{
+				if (scan.currentToken.tokenStr.equals(";"))
+					error("Malformed LENGTH statement");
+				
+				if (scan.currentToken.tokenStr.equals(")"))
+					parenthesisCounter--;
+				else if (scan.currentToken.tokenStr.equals("("))
+					parenthesisCounter++;
+				if (scan.currentToken.primClassif == Token.SEPARATOR
+						&& scan.nextToken.primClassif == Token.SEPARATOR)
+				{
+					if (!scan.currentToken.tokenStr.equals(")")
+							&& scan.nextToken.tokenStr.equals(";"))
+					{
+						error("No argument betweeen " + scan.currentToken.tokenStr
+								+ scan.nextToken.tokenStr);
+					}
+				}
+				
+				scan.getNext();
+			}
+		}
 		
 		return result;
 	}
