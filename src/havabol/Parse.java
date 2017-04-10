@@ -746,7 +746,7 @@ public class Parse
 				//boogle 
 				
 				ResultValue tempeh = getValueOfToken(scan.currentToken);
-				Token tempTok;
+				Token tempTok = null;
 				//scan.currentToken.printToken();
 				//System.out.println(tempeh.toString());
 				if (tempeh.value instanceof HavabolArray) 
@@ -764,6 +764,10 @@ public class Parse
 						tempTok.primClassif = Token.OPERAND;
 						tempTok.subClassif = tempeh.iDataType;
 					}
+					else if (scan.currentToken.primClassif == Token.OPERATOR)
+						error("Cannot perform " + scan.currentToken.tokenStr + " operation on an array");
+					else if (!scan.currentToken.tokenStr.equals(")"))
+						error("Missing right parenthesis");
 					// The operand itself is an array.
 					else
 					{
