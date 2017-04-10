@@ -400,7 +400,7 @@ public class ResultValue {
 				operator.equals("^") || operator.equals("#");
 	}
 	
-	public ResultValue convertType(int targetType, ResultValue valueToConvert) throws Exception
+	public static ResultValue convertType(int targetType, ResultValue valueToConvert) throws Exception
 	{
 		ResultValue returnValue = null;
 		
