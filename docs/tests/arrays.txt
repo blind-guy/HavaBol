@@ -30,11 +30,21 @@ String fooStrArray[10];
 fooStrArray = "Hello World!";
 print(fooStrArray[0], fooStrArray[9]);
 
+
 Int fooIntArray[10];
 fooIntArray = "10";
 print(fooIntArray[0] + fooIntArray[9]);
 
-Int arrAssTestSource[] = 1, 2, 3, 4, 5;
-Int arrAssTestTarget[3];
+Int arrAssTestSource[3] = 1, 2, 3;
+Int arrAssTestTarget[5];
+print(arrAssTestTarget);
 
+arrAssTestTarget = arrAssTestSource;
+
+print(arrAssTestSource, "\n", arrAssTestTarget);
+
+String farts[] = "loud", "deadly", "terrible";
+
+String fart = farts[1];
+print(fart[1]);
 

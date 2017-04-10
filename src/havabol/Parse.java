@@ -655,12 +655,15 @@ public class Parse
 		{
 			if(res2.value instanceof HavabolArray)
 			{
-				System.out.println(res2.value);
-				System.out.println("BINGO");
-				System.exit(0);
+				((HavabolArray) storedObject).fillWithArray((HavabolArray) res2.value);
+				res = new ResultValue(((HavabolArray) storedObject).dclType, storedObject);
 			}
-			ResultValue convertedVal = ResultValue.convertType(((HavabolArray) storedObject).dclType, res2);
-			((HavabolArray) storedObject).setAll(convertedVal);
+			else
+			{
+				ResultValue convertedVal = ResultValue.convertType(((HavabolArray) storedObject).dclType, res2);
+				((HavabolArray) storedObject).setAll(convertedVal);
+				res = new ResultValue(((HavabolArray) storedObject).dclType, convertedVal.value);
+			}
 		}
 		else
 		{
@@ -749,12 +752,27 @@ public class Parse
 				if (tempeh.value instanceof HavabolArray) 
 				{
 					scan.getNext();
-					int index = getSubscript();
-					tempeh = ((HavabolArray) tempeh.value).getElement(index);
 					
-					tempTok = new Token(tempeh.value.toString());
-					tempTok.primClassif = Token.OPERAND;
-					tempTok.subClassif = tempeh.iDataType;
+					// Are we expecting a subscript?
+					if(scan.currentToken.primClassif == Token.SEPARATOR &&
+					   scan.currentToken.tokenStr.equals("["))
+					{
+						int index = getSubscript();
+						tempeh = ((HavabolArray) tempeh.value).getElement(index);
+						
+						tempTok = new Token(tempeh.value.toString());
+						tempTok.primClassif = Token.OPERAND;
+						tempTok.subClassif = tempeh.iDataType;
+					}
+					// The operand itself is an array.
+					else
+					{
+						return new ResultValue(
+										((HavabolArray) tempeh.value).dclType,
+										tempeh.value
+								   );
+						
+					}
 					postfixExpr.add(tempTok);
 					//scan.currentToken.printToken();
 				}

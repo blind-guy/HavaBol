@@ -137,4 +137,27 @@ public class HavabolArray
 			}
 		}
 	}
+
+	public void fillWithArray(HavabolArray sourceArray) throws Exception
+	{
+		int index = 0;
+		
+		this.array = new ArrayList<ResultValue>();
+		while(index < this.maxSize && index < sourceArray.maxSize && index < sourceArray.elem)
+		{
+			
+			if(sourceArray.getElement(index) == null)
+			{
+				this.array.add(null);
+			}
+			else
+			{
+				ResultValue convertedValue = ResultValue.convertType(this.dclType, sourceArray.getElement(index));
+				this.array.add(convertedValue);
+			}
+			index++;
+		}
+		this.currentMaxIndex = index - 1;
+		this.elem = index;
+	}
 }
