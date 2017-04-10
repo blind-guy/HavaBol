@@ -7,9 +7,9 @@ public class HavabolArray
 	private ArrayList<ResultValue> array = new ArrayList<ResultValue>();
 	public int dclType = -1;
 	public int maxSize = 0;
-	private int currentMaxIndex = -1;
-	private boolean isUnbounded = false;
-	private int elem = -1;
+	public int currentMaxIndex = -1;
+	public boolean isUnbounded = false;
+	public int elem = -1;
 	
 	public HavabolArray(int type)
 	{

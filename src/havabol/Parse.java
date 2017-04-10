@@ -588,7 +588,6 @@ public class Parse
 				scan.getNext();
 			}
 		}
-		System.out.println(array);
 	}
 
 
@@ -1440,7 +1439,7 @@ public class Parse
 	 * @param args
 	 * @throws ParserException
 	 */
-	private void error(String msg, Object...args) throws ParserException
+	public void error(String msg, Object...args) throws ParserException
 	{
 		String errorMsg = String.format(msg, args);
 		throw new ParserException(scan.iSourceLineR, errorMsg, scan.sourceFileNm);
