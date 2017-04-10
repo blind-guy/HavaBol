@@ -176,6 +176,7 @@ public class Parse
 		HavabolArray array = null;
 		ResultValue sizeResVal = null;
 		int arrayIndex = -1;
+		Token identifier = null;
 		
 		// If either of these are empty, there is an error.
 		if(stEntry == null)
@@ -193,163 +194,215 @@ public class Parse
 		{
 			error("symbol table for this token is not an identifier");
 		}
-		if((((STIdentifier) stEntry).structure != HavabolStructureType.ARRAY) ||
-		   (!(stObject instanceof HavabolArray)))
-		{
-			error("this variable was not instantiated as an array");
-		}
 		stIdentifier = (STIdentifier) stEntry;
-		array = (HavabolArray) stObject;
 		
-		// Check to see if the stEntry and storage object types are correct.
-		if(stIdentifier.dclType != array.dclType)
+		// If this is an array, we are doing some type of array assignment
+		// or value set.
+		if((stIdentifier.structure == HavabolStructureType.ARRAY) &&
+		   (stObject instanceof HavabolArray))
 		{
-			error("identifier and array type do not match");
-		}
 
-		// Now to start doing the work.
-		
-		// If the array size is not set, we are at the very least doing
-		// an initialization.
-		if(array.maxSize == 0)
-		{
-			// We are still on our identifier.
-			scan.getNext();
-			scan.getNext();
+			array = (HavabolArray) stObject;
 			
-			// If the current token is not a separator, we expect an expression.
-			if(!(scan.currentToken.primClassif == Token.SEPARATOR &&
-		       scan.currentToken.tokenStr.equals("]")))
+			// Check to see if the stEntry and storage object types are correct.
+			if(stIdentifier.dclType != array.dclType)
 			{
-				sizeResVal = expr(bFlag);
-				if(sizeResVal.iDataType != Token.INTEGER)
+				error("identifier and array type do not match");
+			}
+
+			// Now to start doing the work.
+			
+			// If the array size is not set, we are at the very least doing
+			// an initialization.
+			if(array.maxSize == 0)
+			{
+				// We are still on our identifier.
+				scan.getNext();
+				scan.getNext();
+				
+				// If the current token is not a separator, we expect an expression.
+				if(!(scan.currentToken.primClassif == Token.SEPARATOR &&
+			       scan.currentToken.tokenStr.equals("]")))
 				{
-					error("size expression expects type INT, type given is " + Token.strSubClassifM[sizeResVal.iDataType]);
+					sizeResVal = expr(bFlag);
+					if(sizeResVal.iDataType != Token.INTEGER)
+					{
+						error("size expression expects type INT, type given is " + Token.strSubClassifM[sizeResVal.iDataType]);
+					}
+					else
+					{
+						array.maxSize = Integer.parseInt(((Numeric) sizeResVal.value).stringValue);
+					}
+				}
+				
+				if(scan.currentToken.primClassif != Token.SEPARATOR || 
+				   !scan.currentToken.tokenStr.equals("]"))
+				{
+					scan.currentToken.printToken();
+					error("invalid expression given for array size");
+				}
+				scan.getNext();
+				
+				
+				// If the array size was set to an invalid integer value or
+				// is still zero and we are not inferring its size, we should
+				// print an appropriate error message.
+				if(array.maxSize < 0)
+				{
+					error("array size cannot be negative");
+				}
+				else if(array.maxSize == 0)
+				{
+					if(scan.currentToken.primClassif != Token.OPERATOR &&
+					   !scan.currentToken.tokenStr.equals("="))
+					{
+						error("array must be declared with a fixed size or be given an assignment");
+					}
+				}
+				
+				// If we're at an operator, we must start doing assignments
+				// otherwise we must be at a semicolon and can return.
+				if(scan.currentToken.primClassif == Token.OPERATOR)
+				{
+					if(!scan.currentToken.tokenStr.equals("="))
+					{
+						error("invalid assignment operator made in array assignment");
+					}
+					scan.getNext();
+					
+					
+					while(true)
+					{
+						if(scan.currentToken.primClassif == Token.SEPARATOR &&
+						   scan.currentToken.tokenStr.equals(";"))
+						{
+							break;
+						}
+						else if(scan.currentToken.primClassif == Token.SEPARATOR &&
+								scan.currentToken.tokenStr.equals(","))
+						{
+							arrayIndex++;
+							array.unsafeAppend(null);
+							scan.getNext();
+							continue;
+						}
+						
+						arrayIndex++;
+						ResultValue resValToStore = expr(bFlag);
+						resValToStore = ResultValue.convertType(array.dclType, resValToStore);
+						array.unsafeAppend(resValToStore);
+						if(scan.currentToken.primClassif == Token.SEPARATOR &&
+						   scan.currentToken.tokenStr.equals(","))
+						{
+							scan.getNext();
+						}
+					}
+					if(array.maxSize == 0)
+					{
+						array.maxSize = arrayIndex + 1;
+					}
+					else if(array.maxSize < arrayIndex + 1)
+					{
+						error("assigned more values to array than its declared size");
+					}
+				}
+				else if(scan.currentToken.primClassif != Token.SEPARATOR ||
+						!scan.currentToken.tokenStr.equals(";"))
+				{
+					error("invalid array declaration expression");
 				}
 				else
 				{
-					array.maxSize = Integer.parseInt(((Numeric) sizeResVal.value).stringValue);
+					return;
 				}
 			}
-			
-			if(scan.currentToken.primClassif != Token.SEPARATOR || 
-			   !scan.currentToken.tokenStr.equals("]"))
+			// If size is already set, we might be doing a scalar
+			// assignment.
+			//
+			// We need to check if we have an expression to parse.
+			else
 			{
-				scan.currentToken.printToken();
-				error("invalid expression given for array size");
-			}
-			scan.getNext();
-			
-			
-			// If the array size was set to an invalid integer value or
-			// is still zero and we are not inferring its size, we should
-			// print an appropriate error message.
-			if(array.maxSize < 0)
-			{
-				error("array size cannot be negative");
-			}
-			else if(array.maxSize == 0)
-			{
-				if(scan.currentToken.primClassif != Token.OPERATOR &&
-				   !scan.currentToken.tokenStr.equals("="))
-				{
-					error("array must be declared with a fixed size or be given an assignment");
-				}
-			}
-			
-			// If we're at an operator, we must start doing assignments
-			// otherwise we must be at a semicolon and can return.
-			if(scan.currentToken.primClassif == Token.OPERATOR)
-			{
-				if(!scan.currentToken.tokenStr.equals("="))
-				{
-					error("invalid assignment operator made in array assignment");
-				}
+				scan.getNext();
 				scan.getNext();
 				
-				
-				while(true)
+				// If we do not see the right side bracket,
+				// this should be where an expression is.
+				if((scan.currentToken.primClassif != Token.SEPARATOR) || 
+				   (scan.currentToken.primClassif == Token.SEPARATOR && 
+				    !scan.currentToken.tokenStr.equals("]")))
 				{
-					if(scan.currentToken.primClassif == Token.SEPARATOR &&
-					   scan.currentToken.tokenStr.equals(";"))
+					ResultValue indexResVal = expr(bFlag);
+					if(indexResVal.iDataType != Token.INTEGER)
 					{
-						break;
+						error("index expression when making assignment to array must evaluate to integer");
 					}
-					else if(scan.currentToken.primClassif == Token.SEPARATOR &&
-							scan.currentToken.tokenStr.equals(","))
+					else if(scan.currentToken.primClassif != Token.SEPARATOR || 
+							!scan.currentToken.tokenStr.equals("]") ||
+							scan.nextToken.primClassif != Token.OPERATOR ||
+							!scan.nextToken.tokenStr.equals("="))
 					{
-						arrayIndex++;
-						array.unsafeAppend(null);
-						scan.getNext();
-						continue;
+						error("invalid expression given in scalar array assignment");
 					}
 					
-					arrayIndex++;
+					scan.getNext();
+					scan.getNext();
+					
 					ResultValue resValToStore = expr(bFlag);
 					resValToStore = ResultValue.convertType(array.dclType, resValToStore);
-					array.unsafeAppend(resValToStore);
-					if(scan.currentToken.primClassif == Token.SEPARATOR &&
-					   scan.currentToken.tokenStr.equals(","))
-					{
-						scan.getNext();
-					}
-				}
-				if(array.maxSize == 0)
-				{
-					array.maxSize = arrayIndex + 1;
-				}
-				else if(array.maxSize < arrayIndex + 1)
-				{
-					error("assigned more values to array than its declared size");
+					array.put(resValToStore, ((Numeric) indexResVal.value).intValue);
 				}
 			}
-			else if(scan.currentToken.primClassif != Token.SEPARATOR ||
-					!scan.currentToken.tokenStr.equals(";"))
+		}
+		// We are handling an array subscript.
+		else if(stIdentifier.structure == HavabolStructureType.PRIMITIVE &&
+				stIdentifier.dclType == Token.STRING &&
+				stObject instanceof StringBuilder)
+		{
+			identifier = Token.copyToken(scan.currentToken);
+			scan.getNext();
+			int index = getSubscript();
+			scan.getNext();
+			if(scan.currentToken.precedence != Token.OPERATOR &&
+			   !scan.currentToken.tokenStr.equals("="))
 			{
-				error("invalid array declaration expression");
+				error("subscript assignment to an array performed with invalid operator, expects \"=\" and received " + scan.currentToken.tokenStr);
+			}
+			scan.getNext();
+			String strToInsert = ((StringBuilder) ResultValue.convertType(Token.STRING, expr(bFlag)).value).toString();
+			String oldString = ((StringBuilder) stObject).toString();
+			StringBuilder newStringObject = new StringBuilder();
+			if(index >= ((StringBuilder) stObject).toString().length() ||
+			   (index < 0) && (index +  ((StringBuilder) stObject).toString().length()) < 0)
+			{
+				error("subscript index is out of bounds");
 			}
 			else
 			{
-				return;
+				int currentIndex = 0;
+				while(currentIndex < index)
+				{
+					newStringObject.append(oldString.charAt(currentIndex));
+					currentIndex++;
+				}
+				int oldStrIndex = 0;
+				while(oldStrIndex < strToInsert.length())
+				{
+					newStringObject.append(strToInsert.charAt(oldStrIndex));
+					oldStrIndex++;
+					currentIndex++;
+				}
+				while(currentIndex < oldString.length())
+				{
+					newStringObject.append(oldString.charAt(currentIndex));
+					currentIndex++;
+				}
+				if(bFlag)
+				{
+					assign(identifier.tokenStr, new ResultValue(Token.STRING, newStringObject));
+				}
 			}
 		}
-		// If size is already set, we might be doing a scalar
-		// assignment.
-		//
-		// We need to check if we have an expression to parse.
-		else
-		{
-			scan.getNext();
-			scan.getNext();
-			
-			// If we do not see the right side bracket,
-			// this should be where an expression is.
-			if((scan.currentToken.primClassif != Token.SEPARATOR) || 
-			   (scan.currentToken.primClassif == Token.SEPARATOR && 
-			    !scan.currentToken.tokenStr.equals("]")))
-			{
-				ResultValue indexResVal = expr(bFlag);
-				if(indexResVal.iDataType != Token.INTEGER)
-				{
-					error("index expression when making assignment to array must evaluate to integer");
-				}
-				else if(scan.currentToken.primClassif != Token.SEPARATOR || 
-						!scan.currentToken.tokenStr.equals("]") ||
-						scan.nextToken.primClassif != Token.OPERATOR ||
-						!scan.nextToken.tokenStr.equals("="))
-				{
-					error("invalid expression given in scalar array assignment");
-				}
-				
-				scan.getNext();
-				scan.getNext();
-				
-				ResultValue resValToStore = expr(bFlag);
-				resValToStore = ResultValue.convertType(array.dclType, resValToStore);
-				array.put(resValToStore, ((Numeric) indexResVal.value).intValue);
-				scan.getNext();
-			}
-		}
+		scan.getNext();
 	}
 
 

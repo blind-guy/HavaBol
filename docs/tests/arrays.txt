@@ -43,8 +43,14 @@ arrAssTestTarget = arrAssTestSource;
 
 print(arrAssTestSource, "\n", arrAssTestTarget);
 
-String farts[] = "loud", "deadly", "terrible";
+String farts[] = "loud", "deadly",, "terrible";
 
 String fart = farts[1];
 print(fart[1]);
 
+print(farts);
+
+String subsTest = "poo";
+print(subsTest);
+subsTest[2] = "ps";
+print(subsTest);
