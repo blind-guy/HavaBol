@@ -285,9 +285,10 @@ public class Parse
 		{
 			error("expected separator ';' at end of assignment");
 		}**/
-		
-		scan.getNext();
-		
+		if(this.scan.currentToken.primClassif != Token.CONTROL && 
+				this.scan.currentToken.subClassif != Token.FLOW){
+			scan.getNext();
+		}
 		// Print the assignment results if debugging is on.
 		// TODO: res should never be null and should be handled above if we attempt
 		// to make such an assignment.
@@ -1348,6 +1349,7 @@ public class Parse
 	private void forStmt( boolean bFlag ) throws Exception 
 	{
 		Token savedPosition;
+		Token saveControlValue = null;
 		ResultValue controlValue = new ResultValue();
 		ResultValue limitValue = new ResultValue();
 		ResultValue incrementValue = new ResultValue();
@@ -1356,96 +1358,198 @@ public class Parse
 		forValues.add(limitValue);
 		forValues.add(incrementValue);
 		
-		if (bFlag) {
+		// remove the for statement
+		this.scan.getNext();
+		
+		// create an int variable
+		if (this.scan.nextToken.tokenStr.equals("=")) {
+			// enter the cv into the symbol table and
+			Object stObject = null;
+			STIdentifier stEntry = new STIdentifier(scan.currentToken.tokenStr, Token.IDENTIFIER);
+			stObject = new Numeric();
+			stEntry.dclType = Token.INTEGER;
 
-			// increment scope so that we can clean up the control variable when
-			// scope is decremented
-			incrementScope();
+			stEntry.nonLocal = localScope;
 
-			// first entering the loop for is the current token. the loop will
-			// stop once we
-			// hit to. second time through it will stop once we hit by and the
-			// last time through
-			// it will stop at the colon(punctuation) ":"
-			for (int i = 0; i < forValues.size(); i++) {
-				// first value should be set as the control value
-				if (i == 0) {
-					this.scan.currentToken.tokenStr = "Int";
-					this.scan.currentToken.primClassif = 6;
-					this.scan.currentToken.subClassif = 12;
-					declareStmt(bFlag);
-					// set the control value
-					forValues.set(i, assignmentStmt(bFlag));
+			storage.put(scan.currentToken.tokenStr, stObject);
+			scan.symbolTable.putSymbol(scan.currentToken.tokenStr, stEntry);
+
+			// Set the next token and update its prime and sub-classifications
+			// now that we've
+			// identified it (necessary for in-line assignments like: Int foo =
+			// 4;)
+			scan.currentToken.primClassif = stEntry.primClassif;
+			scan.currentToken.subClassif = stEntry.dclType;
+
+			// save a copy of the control value to check if it has been
+			// manipulated
+			saveControlValue = Token.copyToken(this.scan.currentToken);
+			
+			// set the value for the first element 
+			forValues.set(0, assignmentStmt(true));
+			
+			if (!forValues.get(0).isNum) {
+				error("format : for cv = sv to limit by incr:\n values for cv, sv, limit, incr"
+						+ "must evaluate to an integer");
+			}
+		}
+		else if(this.scan.nextToken.tokenStr.equals("in")){
+			//TODO need to create a variable of same data type as the string or array
+			// need to save the token to see what data type in the string or array
+		}
+		else{
+			error("format : for cv = sv to limit by incr:\n for cv in <string/array> by incr:\n for cv in <string/array>");
+		}
+		
+		
+		
+		
+		
+		
+		// check the format
+		/*if (!this.scan.currentToken.tokenStr.equals("to"))
+		{
+			  error(
+			  "format : for cv = sv to limit by incr:\n expected 'to' after " +
+			  "after cv = sv"); 
+		}
+		
+		
+		
+		for(int i = 1; i < forValues.size(); i++){
+			this.scan.getNext();
+			forValues.set(i, expr(bFlag));
+				
+			if (!forValues.get(i).isNum) {
+				error("format : for cv = sv to limit by incr:\n values for cv, sv, limit, incr"
+						+ "must evaluate to an integer");
+			}
+			
+			if (i == 1) {
+				if (!this.scan.currentToken.tokenStr.equals("by")) {
+					error("format : for cv = sv to limit by incr:\n expected 'by' after " + "after Limit");
 				}
+			}
 
-				else {
-					// scan to get to the expression
-					this.scan.getNext();
-					forValues.set(i, expr(bFlag));
+			if (i == 2) {
+				if (!this.scan.currentToken.tokenStr.equals(":")) {
+					error("format : for cv = sv to limit by incr:\n expected ':' at the end" + "of the statement");
 				}
+			}
+		}*/
 
-				// check if all the values evaluate to a number
-				if (!forValues.get(i).isNum) {
-					error("format : for cv = sv to limit by incr:\n values for cv, sv, limit, incr"
-							+ "must evaluate to an integer");
-				}
-
-				if (i == 0) {
-					if (!this.scan.currentToken.tokenStr.equals("to")) {
-						error("format : for cv = sv to limit by incr:\n expected 'to' after " + "after cv = sv");
-					}
-				}
-
-				if (i == 1) {
-					if (!this.scan.currentToken.tokenStr.equals("by")) {
-						error("format : for cv = sv to limit by incr:\n expected 'by' after " + "after Limit");
-					}
-				}
-
-				if (i == 2) {
-					if (!this.scan.currentToken.tokenStr.equals(":")) {
-						error("format : for cv = sv to limit by incr:\n expected ':' at the end" + "of the statement");
-					}
-				}
+		
+		
+		
+			
+		// first entering the loop for is the current token. the loop will
+		// stop once we
+		// hit to. second time through it will stop once we hit by and the
+		// last time through
+		// it will stop at the colon(punctuation) ":"
+		
+		
+		
+		/*for (int i = 0; i < forValues.size(); i++) {
+			// first value should be set as the control value
+			if (i == 0) {
+				this.scan.currentToken.tokenStr = "Int";
+				this.scan.currentToken.primClassif = 6;
+				this.scan.currentToken.subClassif = 12;
+				declareStmt(true);
+				// save a copy of the control value to check if it has been
+				// manipulated
+				saveControlValue = Token.copyToken(this.scan.currentToken);
+				// set the control value
+				forValues.set(i, assignmentStmt(true));
 
 			}
+
+			else {
+				// scan to get to the expression
+				if (i == 2) {
+					this.scan.getNext();
+				}
+				forValues.set(i, expr(bFlag));
+			}
+
+			// check if all the values evaluate to a number
+			if (!forValues.get(i).isNum) {
+				error("format : for cv = sv to limit by incr:\n values for cv, sv, limit, incr"
+						+ "must evaluate to an integer");
+			}
+
+			/*
+			 * if (i == 0) { if (!this.scan.currentToken.tokenStr.equals("to"))
+			 * { error(
+			 * "format : for cv = sv to limit by incr:\n expected 'to' after " +
+			 * "after cv = sv"); } }
+			 
+
+			if (i == 1) {
+				if (!this.scan.currentToken.tokenStr.equals("by")) {
+					error("format : for cv = sv to limit by incr:\n expected 'by' after " + "after Limit");
+				}
+			}
+
+			if (i == 2) {
+				if (!this.scan.currentToken.tokenStr.equals(":")) {
+					error("format : for cv = sv to limit by incr:\n expected ':' at the end" + "of the statement");
+				}
+			}
+
+		}*/
+
+		if (bFlag) {
 
 			// to get to the first element after the colon
 			this.scan.getNext();
 			savedPosition = Token.copyToken(this.scan.currentToken);
 
-			while ((Boolean) forValues.get(0).performBooleanOperation(forValues.get(1), "!=")) {
+			while ((Boolean) forValues.get(0).performOperation(forValues.get(1), "<").value) {
+				// increment scope so that we can clean up the control variable
+				// when
+				// scope is decremented
+				incrementScope();
+
 				// this will return once we have hit end for
 				parseStmt(bFlag);
 
+				decrementScope();
+
 				// set the position back to the top of the loop
 				this.scan.setPos(savedPosition);
-				
+
+				// get value of token(saveControlVariable)
+				forValues.set(0, getValueOfToken(saveControlValue));
 				// increment the control value
 				forValues.set(0, forValues.get(0).performOperation(forValues.get(2), "+"));
+				// store control variable in the symbol table
+				assign(saveControlValue.tokenStr, forValues.get(0));
 
 			}
+			
 			parseStmt(false);
+			
 
 		}
-		// bFlag is false 
-		else{
-			skipTo("for", ":");
+		// bFlag is false
+		else {
+			// skipTo("for", ":");
 			parseStmt(false);
 		}
-		// We've finished executing the loop and need to check to make sure the last
+		// clean up the symbol table
+		this.scan.symbolTable.ht.remove(saveControlValue.tokenStr);
+		this.storage.remove(saveControlValue.tokenStr);
+		// We've finished executing the loop and need to check to make sure the
+		// last
 		// separator is valid for syntax reasons.
-		if(scan.nextToken.primClassif != Token.SEPARATOR ||
-			!scan.nextToken.tokenStr.equals(";"))
-		{
-			error("invalid syntax at end of while loop: expected ';' but received '" +
-				scan.nextToken.tokenStr + "'");
-		}
-		else
-		{
+		if (scan.nextToken.primClassif != Token.SEPARATOR || !scan.nextToken.tokenStr.equals(";")) {
+			error("invalid syntax at end of while loop: expected ';' but received '" + scan.nextToken.tokenStr + "'");
+		} else {
 			scan.getNext();
 			scan.getNext();
 		}
-		
+
 	}
 }
