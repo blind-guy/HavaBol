@@ -373,6 +373,12 @@ public class Parse
 					scan.getNext();
 					
 					ResultValue resValToStore = expr(bFlag);
+					if(storage.get("char") instanceof String)
+			
+					{
+						System.out.println("BINGO");
+						System.exit(0);
+					}
 					resValToStore = ResultValue.convertType(array.dclType, resValToStore);
 					if(bFlag)
 					{
@@ -2198,7 +2204,12 @@ public class Parse
 				if (bFlag) {
 					while (current < size) {
 						// set the current control value
-						currentElement = new ResultValue(Token.STRING, "" + string_or_Array.value.toString().charAt(current));  
+						currentElement = new ResultValue(Token.STRING, new StringBuilder("" + string_or_Array.value.toString().charAt(current)));  
+						if(currentElement.value instanceof String)
+						{
+							System.out.println("STRING STORED IN FORSTMT() -> value -> " + currentElement.value);
+							System.exit(0);
+						}
 						storage.put(saveControlValue.tokenStr, currentElement.value);
 						incrementScope();
 						parseStmt(bFlag);
