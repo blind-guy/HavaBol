@@ -60,6 +60,11 @@ public class Parse
 					{
 						whileStmt(bFlag);				
 					}
+					else if(scan.currentToken.subClassif == Token.FLOW &&
+							scan.currentToken.tokenStr.equals("for"))
+					{
+						forStmt(bFlag);				
+					}
 					// in the case of an if statement we call ifStmt
 					else if(scan.currentToken.subClassif == Token.FLOW &&
 							scan.currentToken.tokenStr.equals("if"))
@@ -70,6 +75,14 @@ public class Parse
 					}
 					else if(scan.currentToken.subClassif == Token.END &&
 							scan.currentToken.tokenStr.equals("endwhile"))
+					{
+						returnVal.terminatingStr = scan.currentToken.tokenStr;
+						returnVal.value = scan.currentToken;
+						returnVal.iDataType = Token.END;
+						return returnVal;
+					}
+					else if(scan.currentToken.subClassif == Token.END &&
+							scan.currentToken.tokenStr.equals("endfor"))
 					{
 						returnVal.terminatingStr = scan.currentToken.tokenStr;
 						returnVal.value = scan.currentToken;
@@ -517,9 +530,10 @@ public class Parse
 		{
 			error("expected separator ';' at end of assignment");
 		}**/
-		
-		scan.getNext();
-		
+		if(this.scan.currentToken.primClassif != Token.CONTROL && 
+				this.scan.currentToken.subClassif != Token.FLOW){
+			scan.getNext();
+		}
 		// Print the assignment results if debugging is on.
 		// TODO: res should never be null and should be handled above if we attempt
 		// to make such an assignment.
@@ -799,7 +813,7 @@ public class Parse
 				//boogle 
 				
 				ResultValue tempeh = getValueOfToken(scan.currentToken);
-				Token tempTok;
+				Token tempTok = null;
 				//scan.currentToken.printToken();
 				//System.out.println(tempeh.toString());
 				if (tempeh.value instanceof HavabolArray) 
@@ -817,6 +831,10 @@ public class Parse
 						tempTok.primClassif = Token.OPERAND;
 						tempTok.subClassif = tempeh.iDataType;
 					}
+					else if (scan.currentToken.primClassif == Token.OPERATOR)
+						error("Cannot perform " + scan.currentToken.tokenStr + " operation on an array");
+					else if (!scan.currentToken.tokenStr.equals(")"))
+						error("Missing right parenthesis");
 					// The operand itself is an array.
 					else
 					{
@@ -1165,7 +1183,11 @@ public class Parse
 	}
 	
 	/**
-	 * 
+	 * this function will check the format of an if statement
+	 * and will decide whether the statement should be executed.
+	 * if the statement needs to be executed statements is passed
+	 * a true boolean. if statements is not executed then it is passed a
+	 * false boolean.
 	 * @param bExec
 	 * @throws Exception
 	 */
@@ -1390,6 +1412,21 @@ public class Parse
 				}
 				if(scan.currentToken.primClassif == Token.CONTROL){
 					error("cannot have a control statement within an if argument");
+				}
+				if(scan.currentToken.primClassif == Token.DEBUG){
+					error("cannot have a debug statement within an if argument");
+				}
+				if(scan.currentToken.primClassif == Token.RT_PAREN){
+					error("cannot have an RT paren within an if argument");
+				}
+				if(scan.currentToken.tokenStr.equals("print")){
+					error("cannot evaluate print function within an if argument");
+				}
+			}
+			if(type.equals("for")){
+				
+				if(scan.currentToken.tokenStr.equals(terminal)){
+					break;
 				}
 				if(scan.currentToken.primClassif == Token.DEBUG){
 					error("cannot have a debug statement within an if argument");
@@ -1847,5 +1884,308 @@ public class Parse
 			scan.getNext();
 			scan.getNext();
 		}
+	}
+	
+	private void forStmt( boolean bFlag ) throws Exception 
+	{
+		Token savedPosition;
+		Token saveControlValue = null;
+		ResultValue controlValue = new ResultValue();
+		ResultValue limitValue = new ResultValue();
+		ResultValue incrementValue = new ResultValue();
+		ResultValue string_or_Array = new ResultValue();
+		ResultValue currentElement = new ResultValue();
+		ArrayList<ResultValue> forValues = new ArrayList<ResultValue>();
+		forValues.add(controlValue);
+		forValues.add(limitValue);
+		forValues.add(incrementValue);
+		
+		// remove the for statement
+		this.scan.getNext();
+		
+		// create an int variable
+		if (this.scan.nextToken.tokenStr.equals("=")) {
+			// enter the cv into the symbol table and
+			Object stObject = null;
+			STIdentifier stEntry = new STIdentifier(scan.currentToken.tokenStr, Token.IDENTIFIER);
+			stObject = new Numeric();
+			stEntry.dclType = Token.INTEGER;
+
+			stEntry.nonLocal = localScope;
+
+			storage.put(scan.currentToken.tokenStr, stObject);
+			scan.symbolTable.putSymbol(scan.currentToken.tokenStr, stEntry);
+
+			// Set the next token and update its prime and sub-classifications
+			// now that we've
+			// identified it (necessary for in-line assignments like: Int foo =
+			// 4;)
+			scan.currentToken.primClassif = stEntry.primClassif;
+			scan.currentToken.subClassif = stEntry.dclType;
+
+			// save a copy of the control value to check if it has been
+			// manipulated
+			saveControlValue = Token.copyToken(this.scan.currentToken);
+			
+			// set the value for the first element 
+			forValues.set(0, assignmentStmt(true));
+			
+			if (!forValues.get(0).isNum) {
+				error("format : for cv = sv to limit by incr:\n values for cv, sv, limit, incr"
+						+ "must evaluate to an integer");
+			}
+			
+			// check the format
+			if (!this.scan.currentToken.tokenStr.equals("to"))
+			{
+				  error(
+				  "format : for cv = sv to limit by incr:\n expected 'to' after " +
+				  "after cv = sv"); 
+			}
+			
+			
+			
+			for(int i = 1; i < forValues.size(); i++){
+				
+				// format of the for loop does not need aa by value to be set
+				// by default it is set to 1
+				if(i == 2 && this.scan.currentToken.tokenStr.equals(":")){
+					forValues.set(i, new ResultValue(Token.INTEGER, "1"));
+				}
+				else{
+					this.scan.getNext();
+					forValues.set(i, expr(bFlag));
+				}	
+				if (!forValues.get(i).isNum) {
+					error("format : for cv = sv to limit by incr:\n values for cv, sv, limit, incr"
+							+ "must evaluate to an integer");
+				}
+				
+
+				if (i == 2) {
+					if (!this.scan.currentToken.tokenStr.equals(":")) {
+						error("format : for cv = sv to limit by incr:\n expected ':' at the end" + "of the statement");
+					}
+				}
+			}
+			
+			if (bFlag) {
+
+				// to get to the first element after the colon
+				this.scan.getNext();
+				savedPosition = Token.copyToken(this.scan.currentToken);
+
+				while ((Boolean) forValues.get(0).performOperation(forValues.get(1), "<").value) {
+					// increment scope so that we can clean up the control variable
+					// when
+					// scope is decremented
+					incrementScope();
+
+					// this will return once we have hit end for
+					parseStmt(bFlag);
+
+					decrementScope();
+
+					// set the position back to the top of the loop
+					this.scan.setPos(savedPosition);
+
+					// get value of token(saveControlVariable)
+					forValues.set(0, getValueOfToken(saveControlValue));
+					// increment the control value
+					forValues.set(0, forValues.get(0).performOperation(forValues.get(2), "+"));
+					// store control variable in the symbol table
+					assign(saveControlValue.tokenStr, forValues.get(0));
+
+				}
+				
+				parseStmt(false);
+				
+
+			}
+			// bFlag is false
+			else {
+				// skipTo("for", ":");
+				parseStmt(false);
+			}
+			
+		}
+		else if(this.scan.nextToken.tokenStr.equals("in")){
+			//TODO need to create a variable of same data type as the string or array
+			// need to save the token to see what data type in the string or array
+			saveControlValue = Token.copyToken(this.scan.currentToken);
+			
+			// should be at "in" right now. 
+			this.scan.getNext();
+			
+			// need to get the data type of the array
+			// should return a result value object with its
+			//values field as a havabol array if the array was declared right
+			string_or_Array = getValueOfToken(this.scan.nextToken);
+			
+			// get the symbol table entry of the token that we are iterating over
+			STEntry what_type = this.scan.symbolTable.getEntry(this.scan.nextToken.tokenStr);
+			
+			// check if the token is an identifier
+			if( ! (what_type instanceof STIdentifier)  ){
+				
+				error("variable must be a string or an array");
+			}
+			
+			// get the type of identifier
+			STIdentifier identity = (STIdentifier) what_type;
+			
+			// token is an array
+			if (identity.structure == HavabolStructureType.ARRAY) {
+
+				// should be at the array or string right now
+				this.scan.getNext();
+
+				Object stObject = null;
+				STIdentifier stEntry = new STIdentifier(saveControlValue.tokenStr, Token.IDENTIFIER);
+
+				stEntry.dclType = ((HavabolArray) string_or_Array.value).dclType;
+
+				if (stEntry.dclType == Token.INTEGER || stEntry.dclType == Token.FLOAT) {
+					stObject = new Numeric();
+				}
+
+				if (stEntry.dclType == Token.BOOLEAN) {
+					stObject = new Boolean(false);
+				}
+
+				if (stEntry.dclType == Token.STRING) {
+					stObject = new StringBuilder();
+
+				}
+
+				stEntry.nonLocal = localScope;
+
+				storage.put(saveControlValue.tokenStr, stObject);
+				scan.symbolTable.putSymbol(saveControlValue.tokenStr, stEntry);
+
+				// Set the next token and update its prime and
+				// sub-classifications
+				// now that we've
+				// identified it (necessary for in-line assignments like: Int
+				// foo =
+				// 4;)
+				saveControlValue.primClassif = stEntry.primClassif;
+				saveControlValue.subClassif = stEntry.dclType;
+
+				// should be at the colon ":"
+				scan.getNext();
+				if (!this.scan.currentToken.tokenStr.equals(":")) {
+					error("format : for cv in array/string:\n expected ':' at the end of the statement");
+				}
+
+				this.scan.getNext();
+
+				// setting the number of loops we will do
+				int size = ((HavabolArray) string_or_Array.value).maxSize;
+				// start at the first element
+				int current = 0;
+
+				savedPosition = Token.copyToken(this.scan.currentToken);
+
+				if (bFlag) {
+					while (current < size) {
+						// set the current control value
+						currentElement = ((HavabolArray) string_or_Array.value).getElement(current);
+						storage.put(saveControlValue.tokenStr, currentElement.value);
+						incrementScope();
+						parseStmt(bFlag);
+						decrementScope();
+						current++;
+						this.scan.setPos(savedPosition);
+
+					}
+
+					parseStmt(false);
+				} 
+				else {
+					parseStmt(false);
+				}
+
+				
+			// token is a string	
+			}else{
+				
+				// token is on the string variable now
+				this.scan.getNext();
+				Object stObject = null;
+				STIdentifier stEntry = new STIdentifier(saveControlValue.tokenStr, Token.IDENTIFIER);
+				stObject = new StringBuilder();
+				stEntry.dclType = Token.STRING;
+
+				stEntry.nonLocal = localScope;
+
+				storage.put(saveControlValue.tokenStr, stObject);
+				scan.symbolTable.putSymbol(saveControlValue.tokenStr, stEntry);
+
+				// Set the next token and update its prime and sub-classifications
+				// now that we've
+				// identified it (necessary for in-line assignments like: Int foo =
+				// 4;)
+				saveControlValue.primClassif = stEntry.primClassif;
+				saveControlValue.subClassif = stEntry.dclType;
+				
+				// should be at the colon ":"
+				scan.getNext();
+				if (!this.scan.currentToken.tokenStr.equals(":")) {
+					error("format : for cv in <array/string>:\n expected ':' at the end of the statement");
+				}
+				
+				// position after colon
+				this.scan.getNext();
+
+				// setting the number of loops we will do
+				int size = string_or_Array.value.toString().length();
+				// start at the first element
+				int current = 0;
+
+				savedPosition = Token.copyToken(this.scan.currentToken);
+				
+				if (bFlag) {
+					while (current < size) {
+						// set the current control value
+						currentElement = new ResultValue(Token.STRING, "" + string_or_Array.value.toString().charAt(current));  
+						storage.put(saveControlValue.tokenStr, currentElement.value);
+						incrementScope();
+						parseStmt(bFlag);
+						decrementScope();
+						current++;
+						this.scan.setPos(savedPosition);
+
+					}
+
+					parseStmt(false);
+				} 
+				else {
+					parseStmt(false);
+				}
+				
+			}
+			
+			
+		}
+		else{
+			error("format : for cv = sv to limit by incr:\n for cv in <string/array> by incr:\n for cv in <string/array>");
+		}
+
+		// clean up the symbol table
+		this.scan.symbolTable.ht.remove(saveControlValue.tokenStr);
+		this.storage.remove(saveControlValue.tokenStr);
+		// We've finished executing the loop and need to check to make sure the
+		// last
+		// separator is valid for syntax reasons.
+		if (scan.nextToken.primClassif != Token.SEPARATOR || !scan.nextToken.tokenStr.equals(";")) {
+			error("invalid syntax at end of while loop: expected ';' but received '" + scan.nextToken.tokenStr + "'");
+		} else {
+			scan.getNext();
+			scan.getNext();
+		}
+		
+		
+
 	}
 }
