@@ -1,0 +1,6 @@
+Bool boolArray[] = T, F, F, T;
+String boolStrArray[4];
+boolStrArray = boolArray;
+for bool in boolStrArray:
+    print(bool);
+endfor;

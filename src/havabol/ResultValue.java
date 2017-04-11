@@ -506,10 +506,20 @@ public class ResultValue {
 				}
 				else if(valueToConvert.iDataType == Token.BOOLEAN)
 				{
-					returnValue = new ResultValue(
-											Token.STRING,
-											new StringBuilder(((Boolean) valueToConvert.value).toString())
-										);
+					if(((Boolean) valueToConvert.value).booleanValue())
+					{
+						returnValue = new ResultValue(
+								Token.STRING,
+								new StringBuilder("T")
+							);
+					}
+					else
+					{
+						returnValue = new ResultValue(
+								Token.STRING,
+								new StringBuilder("F")
+							);
+					}
 				}
 				else if(valueToConvert.iDataType == Token.FLOAT ||
 						valueToConvert.iDataType == Token.INTEGER)
