@@ -1649,11 +1649,12 @@ public class Parse
 		if (exec == true) 
 		{
 			param = expr(exec);
+			param = ResultValue.convertType(Token.STRING, param);
 			//System.out.println(scan.currentToken.tokenStr);
 			if (!scan.currentToken.tokenStr.equals(")"))
 				error("Missing right parenthesis for SPACES function");
 			else if (param.iDataType != Token.STRING)
-				error("LENGTH only takes String arguments");
+				error("SPACES only takes String arguments");
 			boolean containsSpaces = true;
 			String val = param.value.toString();
 			for (int i=0; i<val.length(); i++)
@@ -1675,7 +1676,7 @@ public class Parse
 			while (parenthesisCounter > 0)
 			{
 				if (scan.currentToken.tokenStr.equals(";"))
-					error("Malformed LENGTH statement");
+					error("Malformed SPACES statement");
 				
 				if (scan.currentToken.tokenStr.equals(")"))
 					parenthesisCounter--;
