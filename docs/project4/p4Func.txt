@@ -31,7 +31,7 @@ Int weirdM[] = 10, "20", 30.5; // All of these are valid coercions to Int
 print("weirdM has max elements of", MAXELEM(weirdM)
     , " and", ELEM(weirdM), " are populated");
 
-String name = "Joe";
+name = "Joe";
 print("concat name=", name#' '#"King", "length=", LENGTH(name#' '#"King"));  
 
 name = "Lee";

@@ -1592,6 +1592,7 @@ public class Parse
 		if (exec == true) 
 		{
 			param = expr(exec);
+			param = ResultValue.convertType(Token.STRING, param);
 			//System.out.println(scan.currentToken.tokenStr);
 			if (!scan.currentToken.tokenStr.equals(")"))
 				error("Missing right parenthesis for LENGTH function");
