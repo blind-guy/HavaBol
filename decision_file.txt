@@ -1,0 +1,12 @@
+GROUP: OG Programmers
+
+LEAD: Elijah Arnold
+
+MEMBERS: Elijah Arnold
+         Jake Willis
+         Charles "Nick" Dix
+
+DECISIONS:
+	-We will be implementing an interpreter.
+	-Our interpreter will be for an infix Havabol language.
+

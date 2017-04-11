@@ -1,0 +1,20 @@
+This file details the source files located in src/havabol and who worked on each file towards the completion of program 4.
+
+Source File Name:               Primary Responsible Team Member:    Reviewer:
+
+DivideByZeroException.java      Charles Dix                         Elijah Arnold
+Parse.java                      all members                         all members
+HavabolArray.java               Elijah Arnold                       Jake Willis
+HavabolStructureType.java       *                                   *
+ImproperOperationException.java Charles Dix                         Elijah Arnold
+NotANumberException.java        *                                   *
+Precedence.java                 *                                   *
+ResultValueException.java       Elijah Arnold                       Jake Willis
+ResultValue.java                *                                   *
+
+Description of Member Activities:
+
+Jake Willis 	- implemented all Havabol for loop functionality
+Elijah Arnold 	- implemented arrays and string subscripting assignments
+Charles Dix		- implemented complex expressions, array value and string subscript evaluations
+
