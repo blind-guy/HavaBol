@@ -9,7 +9,7 @@ public class HavabolArray
 	public int maxSize = 0;
 	public int currentMaxIndex = -1;
 	public boolean isUnbounded = false;
-	public int elem = -1;
+	public int elem = 0;
 	
 	public HavabolArray(int type)
 	{
@@ -98,7 +98,7 @@ public class HavabolArray
 		{
 			if(this.currentMaxIndex < index)
 			{
-				while(this.currentMaxIndex < index)
+				while(this.currentMaxIndex < index - 1)
 				{
 					currentMaxIndex++;
 					array.add(null);

@@ -30,6 +30,7 @@ Int iAM[10];
 print("iAm number of elements is", ELEM(iAM));
 iSimp = 1;
 iAM[iSimp] = 100; // not an error
+print(iAM);
 print("\tA", iAM[1]);
 
 // for loops
@@ -66,13 +67,16 @@ for i=0 to ELEM(iDM)-1:
            iDM[j+1] = iDM[j];
            iDM[j] = iTemp;
            bChange = T;
+           print("\t",bChange);
         endif;
     endfor;
     if not bChange:
         print("\tready to leave, i=", i);
         // break;
     endif;
+    print(iDM);
 endfor; 
+print(iDM);
 print("sorted array");
 for i=0 to ELEM(iDM):
     print("\t", iDM[i]);
@@ -88,6 +92,7 @@ endfor;
 // Copy the array
 Int iCopyAM[5];
 iCopyAM = iDM;  // copy the values to the array stop when we have filled it.
+print(iDM);
 print("copy of the sorted array, but with just 5 elements");
 for iTemp in iCopyAM:
     print("\t", iTemp);

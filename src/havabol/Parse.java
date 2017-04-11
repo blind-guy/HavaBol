@@ -244,7 +244,10 @@ public class Parse
 					}
 					else
 					{
-						array.maxSize = Integer.parseInt(((Numeric) sizeResVal.value).stringValue);
+						if(bFlag)
+						{
+							array.maxSize = Integer.parseInt(((Numeric) sizeResVal.value).stringValue);
+						}
 					}
 				}
 				
@@ -295,7 +298,10 @@ public class Parse
 								scan.currentToken.tokenStr.equals(","))
 						{
 							arrayIndex++;
-							array.unsafeAppend(null);
+							if(bFlag)
+							{
+								array.unsafeAppend(null);
+							}
 							scan.getNext();
 							continue;
 						}
@@ -303,7 +309,10 @@ public class Parse
 						arrayIndex++;
 						ResultValue resValToStore = expr(bFlag);
 						resValToStore = ResultValue.convertType(array.dclType, resValToStore);
-						array.unsafeAppend(resValToStore);
+						if(bFlag)
+						{
+							array.unsafeAppend(resValToStore);
+						}
 						if(scan.currentToken.primClassif == Token.SEPARATOR &&
 						   scan.currentToken.tokenStr.equals(","))
 						{
@@ -312,7 +321,10 @@ public class Parse
 					}
 					if(array.maxSize == 0)
 					{
-						array.maxSize = arrayIndex + 1;
+						if(bFlag)
+						{
+							array.maxSize = arrayIndex + 1;
+						}
 					}
 					else if(array.maxSize < arrayIndex + 1)
 					{
@@ -362,7 +374,10 @@ public class Parse
 					
 					ResultValue resValToStore = expr(bFlag);
 					resValToStore = ResultValue.convertType(array.dclType, resValToStore);
-					array.put(resValToStore, ((Numeric) indexResVal.value).intValue);
+					if(bFlag)
+					{
+						array.put(resValToStore, ((Numeric) indexResVal.value).intValue);
+					}
 				}
 			}
 		}
@@ -481,6 +496,8 @@ public class Parse
 		//
 		// In both cases, we need to set its value, however, in the case of numeric types
 		// we should call expression().
+		try
+		{
 		if(operator.tokenStr.equals("="))
 		{
 			res2 = expr(bFlag);
@@ -521,6 +538,23 @@ public class Parse
 		{
 			// TODO: this needs to be added after we've handled prints
 			// error("attempt invalid assignment operation: " + operator.tokenStr);
+		}
+		}
+		catch(NullPointerException | IndexOutOfBoundsException | DivideByZeroException e)
+		{
+			if(bFlag)
+			{
+				throw e;
+			}
+			else
+			{
+				while(scan.currentToken.primClassif != Token.SEPARATOR &&
+					  !scan.currentToken.tokenStr.equals(";"))
+			 	{
+			 		scan.getNext();
+				}
+			 	return null;
+			}
 		}
 		
 		// TODO: check valid separator after assignment
@@ -834,7 +868,10 @@ public class Parse
 					else if (scan.currentToken.primClassif == Token.OPERATOR)
 						error("Cannot perform " + scan.currentToken.tokenStr + " operation on an array");
 					else if (!scan.currentToken.tokenStr.equals(")"))
+					{
+						scan.currentToken.printToken();
 						error("Missing right parenthesis");
+					}
 					// The operand itself is an array.
 					else
 					{
@@ -1954,7 +1991,24 @@ public class Parse
 				}
 				else{
 					this.scan.getNext();
-					forValues.set(i, expr(bFlag));
+					try
+					{
+						forValues.set(i, expr(bFlag));
+					}
+					catch(NullPointerException | IndexOutOfBoundsException | DivideByZeroException e)
+					{
+						if(bFlag)
+						{
+							error("Parse error on line " + scan.iSourceLineR + " at column " + scan.iColPos + "\nMessage: " + e.getMessage());
+						}
+						else
+						{
+		
+							scan.currentToken.printToken();
+							skipTo("for", ":");
+							break;
+						}
+					}
 				}	
 				if (!forValues.get(i).isNum) {
 					error("format : for cv = sv to limit by incr:\n values for cv, sv, limit, incr"
@@ -2004,6 +2058,7 @@ public class Parse
 			}
 			// bFlag is false
 			else {
+				scan.getNext();
 				// skipTo("for", ":");
 				parseStmt(false);
 			}
@@ -2081,7 +2136,7 @@ public class Parse
 				this.scan.getNext();
 
 				// setting the number of loops we will do
-				int size = ((HavabolArray) string_or_Array.value).maxSize;
+				int size = ((HavabolArray) string_or_Array.value).elem;
 				// start at the first element
 				int current = 0;
 
@@ -2172,9 +2227,10 @@ public class Parse
 			error("format : for cv = sv to limit by incr:\n for cv in <string/array> by incr:\n for cv in <string/array>");
 		}
 
-		// clean up the symbol table
+/*		// clean up the symbol table
 		this.scan.symbolTable.ht.remove(saveControlValue.tokenStr);
-		this.storage.remove(saveControlValue.tokenStr);
+		this.storage.remove(saveControlValue.tokenStr); */
+		
 		// We've finished executing the loop and need to check to make sure the
 		// last
 		// separator is valid for syntax reasons.
