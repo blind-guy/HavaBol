@@ -853,7 +853,6 @@ public class Parse
 				if (tempeh.value instanceof HavabolArray) 
 				{
 					scan.getNext();
-					
 					// Are we expecting a subscript?
 					if(scan.currentToken.primClassif == Token.SEPARATOR &&
 					   scan.currentToken.tokenStr.equals("["))
@@ -866,11 +865,8 @@ public class Parse
 						tempTok.subClassif = tempeh.iDataType;
 					}
 					else if (scan.currentToken.primClassif == Token.OPERATOR)
-						error("Cannot perform " + scan.currentToken.tokenStr + " operation on an array");
-					else if (!scan.currentToken.tokenStr.equals(")"))
 					{
-						scan.currentToken.printToken();
-						error("Missing right parenthesis");
+						error("Cannot perform " + scan.currentToken.tokenStr + " operation on an array");
 					}
 					// The operand itself is an array.
 					else
@@ -2003,8 +1999,6 @@ public class Parse
 						}
 						else
 						{
-		
-							scan.currentToken.printToken();
 							skipTo("for", ":");
 							break;
 						}

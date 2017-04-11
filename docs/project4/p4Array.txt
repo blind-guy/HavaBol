@@ -92,7 +92,6 @@ endfor;
 // Copy the array
 Int iCopyAM[5];
 iCopyAM = iDM;  // copy the values to the array stop when we have filled it.
-print(iDM);
 print("copy of the sorted array, but with just 5 elements");
 for iTemp in iCopyAM:
     print("\t", iTemp);
