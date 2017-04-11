@@ -7,9 +7,9 @@ public class HavabolArray
 	private ArrayList<ResultValue> array = new ArrayList<ResultValue>();
 	public int dclType = -1;
 	public int maxSize = 0;
-	private int currentMaxIndex = -1;
-	private boolean isUnbounded = false;
-	private int elem = -1;
+	public int currentMaxIndex = -1;
+	public boolean isUnbounded = false;
+	public int elem = -1;
 	
 	public HavabolArray(int type)
 	{
@@ -86,5 +86,78 @@ public class HavabolArray
 		{
 			return array.get(index);
 		}
+	}
+
+	public void put(ResultValue valToStore, int index)
+	{
+		if((index < 0) || (!isUnbounded && index >= maxSize))
+		{
+			throw new IndexOutOfBoundsException();
+		}
+		else 
+		{
+			if(this.currentMaxIndex < index)
+			{
+				while(this.currentMaxIndex < index)
+				{
+					currentMaxIndex++;
+					array.add(null);
+				}
+				currentMaxIndex++;
+				array.add(valToStore);
+				elem = currentMaxIndex + 1;
+			}
+			else
+			{
+				array.set(index, valToStore);
+			}
+		}
+	}
+
+	public void setAll(ResultValue valToSet)
+	{
+		int index = 0;
+		this.array = new ArrayList<ResultValue>();
+		if(!this.isUnbounded)
+		{
+			while(index < maxSize)
+			{
+				this.array.add(valToSet);
+				index++;
+			}
+			this.currentMaxIndex = index -1 ;
+			this.elem = index;
+		}
+		else
+		{
+			while(index <= currentMaxIndex)
+			{
+				this.array.add(valToSet);
+				index++;
+			}
+		}
+	}
+
+	public void fillWithArray(HavabolArray sourceArray) throws Exception
+	{
+		int index = 0;
+		
+		this.array = new ArrayList<ResultValue>();
+		while(index < this.maxSize && index < sourceArray.maxSize && index < sourceArray.elem)
+		{
+			
+			if(sourceArray.getElement(index) == null)
+			{
+				this.array.add(null);
+			}
+			else
+			{
+				ResultValue convertedValue = ResultValue.convertType(this.dclType, sourceArray.getElement(index));
+				this.array.add(convertedValue);
+			}
+			index++;
+		}
+		this.currentMaxIndex = index - 1;
+		this.elem = index;
 	}
 }

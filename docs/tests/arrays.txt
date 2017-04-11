@@ -1,35 +1,50 @@
-Int i;
-String hi = "hi there";
-i = 4 + (5 - 6) * 2;
-print("i = " # "4 + (5 " # "- 6) " # "* 2");
-print("i+2 i+i: ", i+2, i+i);
-print("i+2 == 2:", i+2 == 2);
-print("i+2 >= 2:", (i+2) >= 2);
-print("2 <= i+2:", 2 <= i+2);
-i = i ^ i;
-print("\"\" # i^4.5  == 256", "" # i^4.5 == 256);
-print(hi);
-i = LENGTH(hi);
-print("LENGTH(\"hi there\") =", i, "or", LENGTH("hi there"));
-print(LENGTH(hi) == LENGTH(hi) and T);
-print(hi, "only contains spaces or is empty:", SPACES(hi));
-print("    ", "only contains spaces or is empty:", SPACES("    "));
-print("", "only contains spaces or is empty:", SPACES("") and T);
-
 // arrays, element assignment, for loops
 // do simple variables still work?
-
 print("p4Array.txt");
 Int iSimp = 50;
 print ("iSimp=", iSimp);
 
 print("Array C with elements printed using constant subscripts");
+Int iCM[10] = 10, 20, 30, 40, 50, 60;
+print("\tC", iCM[0], iCM[1], iCM[2]);
 
-Int iCM[10] = 10, "20", 30, "40.0", 50, 60, , ,35;
+print("Array B with expressions for subscripts");
+Int iBM[] = 10, 20, 30;
+iSimp = 0;
+print("\tB", iBM[iSimp], 10*iBM[iSimp+1], iBM[1+iSimp+1]);
 
-print("Declaring float array.");
+print("Array B with elements replaced");
+iSimp=1;
+iBM[iSimp] = 100;
+iBM[iSimp+1] = 200;
+print("\tB.2", iBM[0], iBM[iSimp], iBM[iSimp+1]);
 
-Float fCM[10] = 10.0, 20, "30.5", "40.0", 50.0, 60.0;
-Bool bCM[] = T, F, T, , F;
-String foo[7] = 1, "two", 3.0, "the quick brown fox", F;
+print("Array F with arrays of arrays");
+Int iFM[] = 10, 20, 30, 40, 50, 0, 1, 2, 3,4,5;
+iSimp = 1;
+print("F", iFM[iSimp-1], iFM[iFM[6]], iFM[(iSimp+2)-1]/10, iFM[iFM[(iSimp+2)-1]/10]
+    , iFM[2*4], iFM[2+iFM[2*4]-1]);
+// BM[iBM[0]-8]);
+print("iAM originally does not have any elements");
+String fooStrArray[10];
+fooStrArray = "Hello World!";
+print(fooStrArray[0], fooStrArray[9]);
+
+
+Int fooIntArray[10];
+fooIntArray = "10";
+print(fooIntArray[0] + fooIntArray[9]);
+
+Int arrAssTestSource[3] = 1, 2, 3;
+Int arrAssTestTarget[5];
+print(arrAssTestTarget);
+
+arrAssTestTarget = arrAssTestSource;
+
+print(arrAssTestSource, "\n", arrAssTestTarget);
+
+String farts[] = "loud", "deadly", "terrible";
+
+String fart = farts[1];
+print(fart[1]);
 

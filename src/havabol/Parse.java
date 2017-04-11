@@ -299,125 +299,7 @@ public class Parse
 					
 					arrayIndex++;
 					ResultValue resValToStore = expr(bFlag);
-					switch(array.dclType)
-					{
-						case Token.INTEGER:
-							if(resValToStore.iDataType == Token.BOOLEAN)
-							{
-								error("cannot convert Bool to integer type");
-							}
-							else if(resValToStore.iDataType == Token.INTEGER)
-							{
-								resValToStore = new ResultValue(
-														resValToStore.iDataType,
-														new Numeric(
-																((Numeric) resValToStore.value).stringValue,
-																resValToStore.iDataType
-															)
-														);
-							}
-							else if(resValToStore.iDataType == Token.FLOAT)
-							{
-								resValToStore = new ResultValue(
-														Token.INTEGER, 
-														"" + ((Numeric) resValToStore.value).intValue
-													);
-							}
-							else if(resValToStore.iDataType == Token.STRING)
-							{
-								// convert the string to an integer if possible
-								resValToStore = new ResultValue(
-														Token.INTEGER, 
-														"" + new Numeric(
-																"" + new Numeric(
-																		((StringBuilder) resValToStore.value).toString(), 
-																		Token.FLOAT
-																	).intValue,
-																Token.INTEGER
-															).intValue
-														);
-							}
-							break;
-						case Token.FLOAT:
-							if(resValToStore.iDataType == Token.BOOLEAN)
-							{
-								error("cannot convert Bool to float type");
-							}
-							else if(resValToStore.iDataType == Token.FLOAT)
-							{
-								resValToStore = new ResultValue(
-													resValToStore.iDataType,
-													new Numeric(
-															((Numeric) resValToStore.value).stringValue,
-															resValToStore.iDataType
-														)
-													);
-							}
-							else if(resValToStore.iDataType == Token.INTEGER)
-							{
-								resValToStore = new ResultValue(Token.FLOAT, "" + ((Numeric) resValToStore.value).doubleValue);
-							}
-							else if(resValToStore.iDataType == Token.STRING)
-							{
-								// convert the string to an integer if possible
-								resValToStore = new ResultValue(
-														Token.FLOAT, 
-														"" + new Numeric(
-																"" + new Numeric(
-																		((StringBuilder) resValToStore.value).toString(), 
-																		Token.FLOAT
-																	).doubleValue,
-																Token.FLOAT
-															).doubleValue
-														);
-							}
-							break;
-						case Token.STRING:
-							if(resValToStore.iDataType == Token.STRING)
-							{
-								resValToStore = new ResultValue(
-														Token.STRING,
-														new StringBuilder(
-																((StringBuilder) resValToStore.value).toString()	
-															)
-														);	
-							}
-							else if(resValToStore.iDataType == Token.BOOLEAN)
-							{
-								resValToStore = new ResultValue(
-														Token.STRING,
-														new StringBuilder(((Boolean) resValToStore.value).toString())
-													);
-							}
-							else if(resValToStore.iDataType == Token.FLOAT ||
-									resValToStore.iDataType == Token.INTEGER)
-							{
-								resValToStore = new ResultValue(
-														Token.STRING,
-														new StringBuilder(
-																((Numeric) resValToStore.value).stringValue
-															)
-													);
-							}
-							break;
-						case Token.BOOLEAN:
-							if(resValToStore.iDataType == Token.BOOLEAN)
-							{
-								resValToStore = new ResultValue(
-														Token.BOOLEAN,
-														new Boolean(((Boolean) resValToStore.value).booleanValue())
-													);
-										
-							}
-							else
-							{
-								error("cannot convert a " + Token.strSubClassifM[resValToStore.iDataType] + " to a boolean value");
-							}
-							break;
-						default:
-							resValToStore = null;
-							break;
-					}
+					resValToStore = ResultValue.convertType(array.dclType, resValToStore);
 					array.unsafeAppend(resValToStore);
 					if(scan.currentToken.primClassif == Token.SEPARATOR &&
 					   scan.currentToken.tokenStr.equals(","))
@@ -444,7 +326,43 @@ public class Parse
 				return;
 			}
 		}
-		System.out.println(array);
+		// If size is already set, we might be doing a scalar
+		// assignment.
+		//
+		// We need to check if we have an expression to parse.
+		else
+		{
+			scan.getNext();
+			scan.getNext();
+			
+			// If we do not see the right side bracket,
+			// this should be where an expression is.
+			if((scan.currentToken.primClassif != Token.SEPARATOR) || 
+			   (scan.currentToken.primClassif == Token.SEPARATOR && 
+			    !scan.currentToken.tokenStr.equals("]")))
+			{
+				ResultValue indexResVal = expr(bFlag);
+				if(indexResVal.iDataType != Token.INTEGER)
+				{
+					error("index expression when making assignment to array must evaluate to integer");
+				}
+				else if(scan.currentToken.primClassif != Token.SEPARATOR || 
+						!scan.currentToken.tokenStr.equals("]") ||
+						scan.nextToken.primClassif != Token.OPERATOR ||
+						!scan.nextToken.tokenStr.equals("="))
+				{
+					error("invalid expression given in scalar array assignment");
+				}
+				
+				scan.getNext();
+				scan.getNext();
+				
+				ResultValue resValToStore = expr(bFlag);
+				resValToStore = ResultValue.convertType(array.dclType, resValToStore);
+				array.put(resValToStore, ((Numeric) indexResVal.value).intValue);
+				scan.getNext();
+			}
+		}
 	}
 
 
@@ -747,6 +665,20 @@ public class Parse
 			storage.put(key, valueToStore);
 			res = new ResultValue(stEntry.dclType, valueToStore);
 		}
+		else if(storedObject instanceof HavabolArray)
+		{
+			if(res2.value instanceof HavabolArray)
+			{
+				((HavabolArray) storedObject).fillWithArray((HavabolArray) res2.value);
+				res = new ResultValue(((HavabolArray) storedObject).dclType, storedObject);
+			}
+			else
+			{
+				ResultValue convertedVal = ResultValue.convertType(((HavabolArray) storedObject).dclType, res2);
+				((HavabolArray) storedObject).setAll(convertedVal);
+				res = new ResultValue(((HavabolArray) storedObject).dclType, convertedVal.value);
+			}
+		}
 		else
 		{
 			/**System.out.println("CURRENT KEY WHICH FAILED LOOKUP: " + key);
@@ -828,18 +760,37 @@ public class Parse
 				//boogle 
 				
 				ResultValue tempeh = getValueOfToken(scan.currentToken);
-				Token tempTok;
+				Token tempTok = null;
 				//scan.currentToken.printToken();
 				//System.out.println(tempeh.toString());
 				if (tempeh.value instanceof HavabolArray) 
 				{
 					scan.getNext();
-					int index = getSubscript();
-					tempeh = ((HavabolArray) tempeh.value).getElement(index);
 					
-					tempTok = new Token(tempeh.value.toString());
-					tempTok.primClassif = Token.OPERAND;
-					tempTok.subClassif = tempeh.iDataType;
+					// Are we expecting a subscript?
+					if(scan.currentToken.primClassif == Token.SEPARATOR &&
+					   scan.currentToken.tokenStr.equals("["))
+					{
+						int index = getSubscript();
+						tempeh = ((HavabolArray) tempeh.value).getElement(index);
+						
+						tempTok = new Token(tempeh.value.toString());
+						tempTok.primClassif = Token.OPERAND;
+						tempTok.subClassif = tempeh.iDataType;
+					}
+					else if (scan.currentToken.primClassif == Token.OPERATOR)
+						error("Cannot perform " + scan.currentToken.tokenStr + " operation on an array");
+					else if (!scan.currentToken.tokenStr.equals(")"))
+						error("Missing right parenthesis");
+					// The operand itself is an array.
+					else
+					{
+						return new ResultValue(
+										((HavabolArray) tempeh.value).dclType,
+										tempeh.value
+								   );
+						
+					}
 					postfixExpr.add(tempTok);
 					//scan.currentToken.printToken();
 				}
@@ -1301,7 +1252,7 @@ public class Parse
 	 * @param args
 	 * @throws ParserException
 	 */
-	private void error(String msg, Object...args) throws ParserException
+	public void error(String msg, Object...args) throws ParserException
 	{
 		String errorMsg = String.format(msg, args);
 		throw new ParserException(scan.iSourceLineR, errorMsg, scan.sourceFileNm);
@@ -1455,6 +1406,14 @@ public class Parse
 		{
 			return spaces(bFlag);
 			//return length(bFlag);
+		}
+		else if (scan.currentToken.tokenStr.equals("ELEM"))
+		{
+			return elem(bFlag);
+		}
+		else if (scan.currentToken.tokenStr.equals("MAXELEM"))
+		{
+			return maxElem(bFlag);
 		}
 		
 		return new ResultValue();
@@ -1644,6 +1603,110 @@ public class Parse
 			}
 		}
 		//System.out.println(result.iDataType + " " + result.toString());
+		
+		return result;
+	}
+	
+	private ResultValue elem(boolean exec) throws Exception 
+	{
+		scan.getNext();
+		int parenthesisCounter = 0;
+		if (!scan.currentToken.tokenStr.equals("("))
+			error("Missing left parenthesis for ELEM function");
+		parenthesisCounter++;
+		ResultValue result = null;
+		scan.getNext();
+		
+		if (exec == true) 
+		{
+			result = convertCurrentTokenToResultValue();
+			if (result.value instanceof HavabolArray) 
+			{
+				scan.getNext();
+				if (!scan.currentToken.tokenStr.equals(")"))
+					error("Missing right parenthesis for ELEM function");
+				return ((HavabolArray) result.value).getElem();
+			}
+			else
+				error("ELEM function takes an array as an argument");
+		}
+		else 
+		{
+			while (parenthesisCounter > 0)
+			{
+				if (scan.currentToken.tokenStr.equals(";"))
+					error("Malformed LENGTH statement");
+				
+				if (scan.currentToken.tokenStr.equals(")"))
+					parenthesisCounter--;
+				else if (scan.currentToken.tokenStr.equals("("))
+					parenthesisCounter++;
+				if (scan.currentToken.primClassif == Token.SEPARATOR
+						&& scan.nextToken.primClassif == Token.SEPARATOR)
+				{
+					if (!scan.currentToken.tokenStr.equals(")")
+							&& scan.nextToken.tokenStr.equals(";"))
+					{
+						error("No argument betweeen " + scan.currentToken.tokenStr
+								+ scan.nextToken.tokenStr);
+					}
+				}
+				
+				scan.getNext();
+			}
+		}
+		
+		return result;
+	}
+	
+	private ResultValue maxElem(boolean exec) throws Exception 
+	{
+		scan.getNext();
+		int parenthesisCounter = 0;
+		if (!scan.currentToken.tokenStr.equals("("))
+			error("Missing left parenthesis for MAXELEM function");
+		parenthesisCounter++;
+		ResultValue result = null;
+		scan.getNext();
+		
+		if (exec == true) 
+		{
+			result = convertCurrentTokenToResultValue();
+			if (result.value instanceof HavabolArray) 
+			{
+				scan.getNext();
+				if (!scan.currentToken.tokenStr.equals(")"))
+					error("Missing right parenthesis for MAXELEM function");
+				return ((HavabolArray) result.value).getMaxElem();
+			}
+			else
+				error("MAXELEM function takes an array as an argument");
+		}
+		else 
+		{
+			while (parenthesisCounter > 0)
+			{
+				if (scan.currentToken.tokenStr.equals(";"))
+					error("Malformed LENGTH statement");
+				
+				if (scan.currentToken.tokenStr.equals(")"))
+					parenthesisCounter--;
+				else if (scan.currentToken.tokenStr.equals("("))
+					parenthesisCounter++;
+				if (scan.currentToken.primClassif == Token.SEPARATOR
+						&& scan.nextToken.primClassif == Token.SEPARATOR)
+				{
+					if (!scan.currentToken.tokenStr.equals(")")
+							&& scan.nextToken.tokenStr.equals(";"))
+					{
+						error("No argument betweeen " + scan.currentToken.tokenStr
+								+ scan.nextToken.tokenStr);
+					}
+				}
+				
+				scan.getNext();
+			}
+		}
 		
 		return result;
 	}

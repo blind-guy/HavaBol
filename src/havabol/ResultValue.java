@@ -400,6 +400,152 @@ public class ResultValue {
 				operator.equals("^") || operator.equals("#");
 	}
 	
+	public static ResultValue convertType(int targetType, ResultValue valueToConvert) throws Exception
+	{
+		ResultValue returnValue = null;
+		
+		if(valueToConvert == null)
+		{
+			throw new NullPointerException("attempted to convert a null ResultValue object");
+		}
+		else if(valueToConvert.value == null)
+		{
+			throw new NullPointerException("value field in ResultValue to convert is null");
+		}
+		else if(valueToConvert.value instanceof HavabolArray)
+		{
+			throw new ResultValueConversionException("can only convert primitive types");
+		}
+			
+		switch(targetType)
+		{
+			case Token.INTEGER:
+				if(valueToConvert.iDataType == Token.BOOLEAN)
+				{
+					throw new ResultValueConversionException("cannot convert Bool to integer type");
+				}
+				else if(valueToConvert.iDataType == Token.INTEGER)
+				{
+					returnValue = new ResultValue(
+											valueToConvert.iDataType,
+											new Numeric(
+													((Numeric) valueToConvert.value).stringValue,
+													valueToConvert.iDataType
+												)
+											);
+				}
+				else if(valueToConvert.iDataType == Token.FLOAT)
+				{
+					returnValue = new ResultValue(
+											Token.INTEGER, 
+											"" + ((Numeric) valueToConvert.value).intValue
+										);
+				}
+				else if(valueToConvert.iDataType == Token.STRING)
+				{
+					// convert the string to an integer if possible
+					returnValue = new ResultValue(
+											Token.INTEGER, 
+											"" + new Numeric(
+													"" + new Numeric(
+															((StringBuilder) valueToConvert.value).toString(), 
+															Token.FLOAT
+														).intValue,
+													Token.INTEGER
+												).intValue
+											);
+				}
+				break;
+			case Token.FLOAT:
+				if(valueToConvert.iDataType == Token.BOOLEAN)
+				{
+					throw new ResultValueConversionException("cannot convert Bool to float type");
+				}
+				else if(valueToConvert.iDataType == Token.FLOAT)
+				{
+					returnValue = new ResultValue(
+										valueToConvert.iDataType,
+										new Numeric(
+												((Numeric) valueToConvert.value).stringValue,
+												valueToConvert.iDataType
+											)
+										);
+				}
+				else if(valueToConvert.iDataType == Token.INTEGER)
+				{
+					returnValue = new ResultValue(Token.FLOAT, "" + ((Numeric) valueToConvert.value).doubleValue);
+				}
+				else if(valueToConvert.iDataType == Token.STRING)
+				{
+					// convert the string to an integer if possible
+					returnValue = new ResultValue(
+											Token.FLOAT, 
+											"" + new Numeric(
+													"" + new Numeric(
+															((StringBuilder) valueToConvert.value).toString(), 
+															Token.FLOAT
+														).doubleValue,
+													Token.FLOAT
+												).doubleValue
+											);
+				}
+				else
+				{
+					throw new ResultValueConversionException("could not convert the result value to the given type: " + Token.strSubClassifM[valueToConvert.iDataType] + " to " + Token.strSubClassifM[targetType]);
+				}
+				break;
+			case Token.STRING:
+				if(valueToConvert.iDataType == Token.STRING)
+				{
+					returnValue = new ResultValue(
+											Token.STRING,
+											new StringBuilder(
+													((StringBuilder) valueToConvert.value).toString()	
+												)
+											);	
+				}
+				else if(valueToConvert.iDataType == Token.BOOLEAN)
+				{
+					returnValue = new ResultValue(
+											Token.STRING,
+											new StringBuilder(((Boolean) valueToConvert.value).toString())
+										);
+				}
+				else if(valueToConvert.iDataType == Token.FLOAT ||
+						valueToConvert.iDataType == Token.INTEGER)
+				{
+					returnValue = new ResultValue(
+											Token.STRING,
+											new StringBuilder(
+													((Numeric) valueToConvert.value).stringValue
+												)
+										);
+				}
+				else
+				{
+					throw new ResultValueConversionException("could not convert the result value to the given type: " + Token.strSubClassifM[valueToConvert.iDataType] + " to " + Token.strSubClassifM[targetType]);
+				}
+				break;
+			case Token.BOOLEAN:
+				if(valueToConvert.iDataType == Token.BOOLEAN)
+				{
+					returnValue = new ResultValue(
+											Token.BOOLEAN,
+											new Boolean(((Boolean) valueToConvert.value).booleanValue())
+										);
+							
+				}
+				else
+				{
+					throw new ResultValueConversionException("cannot convert a " + Token.strSubClassifM[valueToConvert.iDataType] + " to a boolean value");
+				}
+				break;
+			default:
+				throw new ResultValueConversionException("could not convert the result value to the given type: " + Token.strSubClassifM[valueToConvert.iDataType] + " to " + Token.strSubClassifM[targetType]);
+		}
+		
+		return returnValue;
+	}
 	
 	@Override
 	public String toString() {
