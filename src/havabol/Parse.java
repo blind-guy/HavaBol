@@ -1572,7 +1572,21 @@ public class Parse
 			{
 				if (rs == null)
 					error("Cannot print null value");
-				System.out.print(rs.value.toString().concat(" "));
+				if(rs.iDataType == Token.BOOLEAN && (rs.value instanceof Boolean))
+				{
+					if(((Boolean) rs.value).booleanValue())
+					{
+						System.out.print("T ");
+					}
+					else
+					{
+						System.out.print("F ");
+					}
+				}
+				else
+				{
+					System.out.print(rs.value.toString().concat(" "));
+				}
 			}
 			System.out.println();
 		}

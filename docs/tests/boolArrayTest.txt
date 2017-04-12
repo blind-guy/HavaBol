@@ -4,3 +4,11 @@ boolStrArray = boolArray;
 for bool in boolStrArray:
     print(bool);
 endfor;
+print(SPACES(3));
+Int ints[] = 1, 2, 3;
+Float floats[] = 1.0, 2.0, 3.0;
+String strings[] = "1", "2", "3";
+print(ints);
+print(floats);
+print(strings);
+print(boolArray);

@@ -29,10 +29,20 @@ public class HavabolArray
 	@Override
 	public String toString()
 	{
+		String unboundedStrRep;
+		if(isUnbounded)
+		{
+			unboundedStrRep = "T";
+		}
+		else
+		{
+			unboundedStrRep = "F";
+		}
 		String ret = "TYPE: " + Token.strSubClassifM[dclType] + ", " +
 					 "MAXELEM: " + maxSize + ", " +
 					 "ELEM: " + elem + ", " +
-					 "UNBOUNDED: " + isUnbounded;
+					 "UNBOUNDED: " + unboundedStrRep + " VALUES[";
+		int count = 0;
 		for(ResultValue val: array)
 		{
 			String stringToAppend = "";
@@ -42,7 +52,14 @@ public class HavabolArray
 			}
 			else if(val.iDataType == Token.BOOLEAN)
 			{
-				stringToAppend = ((Boolean) val.value).toString();
+				if(((Boolean) val.value).booleanValue())
+				{
+					stringToAppend = "T";
+				}
+				else
+				{
+					stringToAppend = "F";
+				}
 			}
 			else if(val.iDataType == Token.STRING)
 			{
@@ -53,9 +70,19 @@ public class HavabolArray
 			{
 				stringToAppend = ((Numeric) val.value).stringValue;
 			}
-			ret = ret + ", " + stringToAppend;
+			
+			ret = ret + stringToAppend;
+			
+			if(count == this.currentMaxIndex)
+			{
+				ret = ret + "]";
+			}
+			else
+			{
+				ret = ret + ", ";
+			}
+			count++;
 		}
-		
 		return ret;
 	}
 	
