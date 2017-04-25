@@ -2003,7 +2003,7 @@ public class Parse
 			for(int i = 1; i < forValues.size(); i++){
 				
 				// format of the for loop does not need aa by value to be set
-				// by default it is set to 1
+				// for incr. by default it is set to 1
 				if(i == 2 && this.scan.currentToken.tokenStr.equals(":")){
 					forValues.set(i, new ResultValue(Token.INTEGER, "1"));
 				}
@@ -2181,6 +2181,9 @@ public class Parse
 			// token is a string	
 			}else{
 				
+				if(this.scan.nextToken.subClassif != Token.STRING){
+					error("variable must be a string or an array");
+				}
 				// token is on the string variable now
 				this.scan.getNext();
 				Object stObject = null;
@@ -2255,8 +2258,11 @@ public class Parse
 		// We've finished executing the loop and need to check to make sure the
 		// last
 		// separator is valid for syntax reasons.
+		if(!this.scan.currentToken.tokenStr.equals("endfor")){
+			error("invalid syntax at the end of a for loop: expected 'endfor' at the end of a for loop");
+		}
 		if (scan.nextToken.primClassif != Token.SEPARATOR || !scan.nextToken.tokenStr.equals(";")) {
-			error("invalid syntax at end of while loop: expected ';' but received '" + scan.nextToken.tokenStr + "'");
+			error("invalid syntax at end of for loop: expected ';' but received '" + scan.nextToken.tokenStr + "'");
 		} else {
 			scan.getNext();
 			scan.getNext();
