@@ -2055,6 +2055,10 @@ public class Parse
 					parseStmt(bFlag);
 
 					decrementScope();
+					
+					if(!this.scan.currentToken.tokenStr.equals("endfor")){
+						error("invalid syntax at the end of a for loop: expected 'endfor' at the end of a for loop");
+					}
 
 					// set the position back to the top of the loop
 					this.scan.setPos(savedPosition);
@@ -2166,6 +2170,9 @@ public class Parse
 						incrementScope();
 						parseStmt(bFlag);
 						decrementScope();
+						if(!this.scan.currentToken.tokenStr.equals("endfor")){
+							error("invalid syntax at the end of a for loop: expected 'endfor' at the end of a for loop");
+						}
 						current++;
 						this.scan.setPos(savedPosition);
 
@@ -2232,7 +2239,11 @@ public class Parse
 						incrementScope();
 						parseStmt(bFlag);
 						decrementScope();
+						if(!this.scan.currentToken.tokenStr.equals("endfor")){
+							error("invalid syntax at the end of a for loop: expected 'endfor' at the end of a for loop");
+						}
 						current++;
+						
 						this.scan.setPos(savedPosition);
 
 					}
