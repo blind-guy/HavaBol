@@ -526,7 +526,7 @@ public class Parse
 		{
 			if(identifier.subClassif == Token.STRING)
 			{
-				error("attempated invalid assignment operator on string");
+				error("attempted invalid assignment operator on string");
 			}
 			else
 			{
@@ -609,11 +609,11 @@ public class Parse
 					res = new ResultValue(identifier.subClassif, new Numeric(identifier.tokenStr, Token.FLOAT));
 					break;
 				case Token.BOOLEAN:
-					if(identifier.tokenStr.equals("T"))
+					if(identifier.tokenStr.equals("T") || identifier.tokenStr.equals("true"))
 					{
 						res = new ResultValue(identifier.subClassif, new Boolean(true));
 					}
-					else if(identifier.tokenStr.equals("F"))
+					else if(identifier.tokenStr.equals("F") || identifier.tokenStr.equals("false"))
 					{
 						res = new ResultValue(identifier.subClassif, new Boolean(false));
 					}
@@ -972,6 +972,10 @@ public class Parse
 			}
 			else if (scan.currentToken.primClassif == Token.FUNCTION)
 			{
+				if (scan.currentToken.tokenStr.equals("print")) 
+				{
+					error("Cannot perform operation with print function");
+				}
 				// take result value from callBuiltInFunction and convert it to a token
 				ResultValue funcResultVal = callBuiltInFunction(exec);
 				Token funcResultToken = new Token(funcResultVal.value.toString());

@@ -1,0 +1,137 @@
+// Pseudo-random Password Generator. Edit variables at the head of the file to generate a new password.
+// The following variables may be changed: haveLets, haveNums, haveSpecs, toggle, seed, secondSeed
+// seedInc, seedDec, and passLength. For beginning use, it is best to change the passLength to the
+// appropriate number of characters for a password and to change seed and secondSeed.
+
+//debug bShowToken on;
+//debug bShowExpr on;
+//debug bShowAssign on;
+
+Bool haveLets = T;			// Have letters
+Bool haveNums = T;			// Have numbers
+Bool haveSpecs = T;			// Have special characters
+Bool toggle = F;			// For pseudorandom entering of if statements
+Int seed = 12345;			// Alter seed for a new password
+String secondSeed = "12345"; // Alter this seed for a different distribution of characters, letters, numbers
+Int origSeed = seed;
+Int seedInc = 7;			// Used to change seed value in a pseudo-random manner
+Int seedDec = 5;			// Also used to change seed value in pseudo-random manner
+Int passLength = 10;		// Password length
+String password = "";
+Int remainder = 0;
+Int factor = 0;
+Int secondFactor;
+
+// Letters, numbers, and special characters to choose from
+String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+Int numbers[] = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9;
+String specialCharacters[28] = "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", 
+			"+", "=", "[", "]", "{", "}", "|", "\\", ";", ":", ",", ".", "<", ">", "?", "/";
+Int i = 0;
+Int j = 0;
+
+// Loop until a password has been created
+while i < passLength:
+	
+	// means of randomizing whether a letter, number, or special character is put in the current position
+	if j >= LENGTH(secondSeed):
+		j = 0;
+	endif;
+	secondFactor = 0 + secondSeed[j];
+	factor = secondFactor / 3;
+	remainder = secondFactor - factor * 3;
+	
+	if remainder == 2:
+		// if letters are allowed in the password, toggle between seed values
+	 	if haveLets == T:
+	 		seed = seed + seedInc; // increment seed
+	 		if toggle == T:
+	 			// perform modulo to make sure index is within bounds of string size
+	 			factor = seed / LENGTH(letters);
+	 			remainder = seed - factor * LENGTH(letters);
+	 			password = password # letters[remainder]; // choose letter from letter string
+	 			toggle = not toggle;
+	 		else:
+	 			seed = seed - seedDec; // decrement seed
+	 			factor = seed / LENGTH(letters);
+	 			remainder = seed - factor * LENGTH(letters);
+	 			password = password # letters[remainder];
+	 			toggle = not toggle;
+	 		endif;
+	 		if seed < 0:			// if seed is negative, set to original value
+	 			seed = origSeed;
+	 		endif;
+	 		if seed > 1000000:		// if seed begins to get large, set to original value and decrement
+	 			seed = origSeed - seedDec;
+	 		endif;
+	 	endif;
+	endif;
+ 	
+ 	// means of randomizing whether a letter, number, or special character is put in the current position
+	if j >= LENGTH(secondSeed):
+		j = 0;
+	endif;
+	secondFactor = 0 + secondSeed[j];
+	factor = secondFactor / 3;
+	remainder = secondFactor - factor * 3;
+	
+ 	if remainder == 0:
+	 	if haveNums == T:
+	 		seed = seed + seedInc;
+	 		if toggle == F:
+	 			factor = seed / MAXELEM(numbers);
+	 			remainder = seed - factor * MAXELEM(numbers);
+	 			password = password # numbers[remainder]; // select number from array of Ints, numbers
+	 			toggle = not toggle;
+	 		else:
+	 			seed = seed - seedDec;
+	 			factor = seed / MAXELEM(numbers);
+	 			remainder = seed - factor * MAXELEM(numbers);
+	 			password = password # numbers[remainder];
+	 			toggle = not toggle;
+	 		endif;
+	 		if seed < 0:
+	 			seed = origSeed;
+	 		endif;
+	 		if seed > 1000000:
+	 			seed = origSeed - seedDec;
+	 		endif;
+	 	endif;
+	endif;
+	
+	// means of randomizing whether a letter, number, or special character is put in the current position
+	if j >= LENGTH(secondSeed):
+		j = 0;
+	endif;
+	secondFactor = 0 + secondSeed[j];
+	factor = secondFactor / 3;
+	remainder = secondFactor - factor * 3;
+	
+	if remainder == 1:
+	 	if haveSpecs == T:
+	 		seed = seed - seedDec;
+	 		if toggle == F:
+	 			factor = seed / MAXELEM(specialCharacters);
+	 			remainder = seed - factor * MAXELEM(specialCharacters);
+	 			password = password # specialCharacters[remainder];	// select from array of Strings, specialCharacters
+	 			toggle = not toggle;
+	 		else:
+	 			seed = seed + seedInc;
+	 			factor = seed / MAXELEM(specialCharacters);
+	 			remainder = seed - factor * MAXELEM(specialCharacters);
+	 			password = password # specialCharacters[remainder];
+	 			toggle = not toggle;
+	 		endif;
+	 		if seed < 0:
+	 			seed = origSeed;
+	 		endif;
+	 		if seed > 1000000:
+	 			seed = origSeed - seedDec;
+	 		endif;
+	 	endif;
+	endif;
+	
+	i += 1;
+	j += 1;
+endwhile;
+print(password);
