@@ -1014,6 +1014,10 @@ public class Parse
 			{
 				error("variable is undeclared or undefined in this scope");
 			}
+			if (storage.get(scan.currentToken.tokenStr) == null)
+			{
+				error("variable " + scan.currentToken.tokenStr + " is unitialized");
+			}
 			res = new ResultValue(scan.currentToken.subClassif, storage.get(scan.currentToken.tokenStr));
 			//res = new ResultValue(identifier.dclType, storage.get(scan.currentToken.tokenStr));
 		}

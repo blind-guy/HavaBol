@@ -1,0 +1,21 @@
+//print(and F);
+
+//Int i = 1 +;
+
+//print(T and F or 5);
+
+//Int k;
+//print(k);
+
+//Int iCM[5] = 1, 2, 3, 4, 5;
+//Int k = 0;
+//k = iCM + k;
+//k = k + iCM;
+
+//Int i = 1 + 3 $ 2;
+
+//Int i = 1;
+//ELEM(i);
+
+//Int i;
+//print(LENGTH(i));
