@@ -368,13 +368,30 @@ public class Parse
 					{
 						error("invalid expression given in scalar array assignment");
 					}
-					
+					ResultValue resValToStore = null;
 					scan.getNext();
 					scan.getNext();
-					
-					ResultValue resValToStore = expr(bFlag);
-					if(storage.get("char") instanceof String)
-			
+					try
+					{
+						resValToStore = expr(bFlag);	
+					}
+					catch(NullPointerException | IndexOutOfBoundsException | DivideByZeroException e)
+					{
+						if(bFlag)
+						{
+							throw e;
+						}
+						else
+						{
+							while(scan.currentToken.primClassif != Token.SEPARATOR &&
+								  !scan.currentToken.tokenStr.equals(";"))
+						 	{
+						 		scan.getNext();
+							}
+						 	return;
+						}
+					}
+					if(storage.get("char") instanceof String)			
 					{
 						System.out.println("BINGO");
 						System.exit(0);
