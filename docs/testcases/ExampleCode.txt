@@ -48,10 +48,6 @@ for a = 0 to ELEM(intArray) by 1: // iterate from 0 to the last subscript in the
 	endif;											// that would lead to an error.
 endfor;
 
-if T
-print("hello");
-endif;
-
 Int k;
 print(k);
 while i < 10:
