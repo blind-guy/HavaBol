@@ -606,6 +606,7 @@ public class Parse
 	{
 		STIdentifier stEntry = null;
 		ResultValue res = null;
+		Object stObject = null;
 		if(identifier.primClassif == Token.IDENTIFIER)
 		{	
 			stEntry = (STIdentifier) scan.symbolTable.getEntry(identifier.tokenStr);
@@ -613,7 +614,12 @@ public class Parse
 			{
 				error("variable is undeclared or undefined in this scope");
 			}
-			res = new ResultValue(identifier.subClassif, storage.get(identifier.tokenStr));
+			stObject = storage.get(identifier.tokenStr);
+			if(stObject == null)
+			{
+				error("attempting to access uninitialized variable");
+			}
+			res = new ResultValue(identifier.subClassif, stObject);
 		}
 		else if(identifier.primClassif == Token.OPERAND)
 		{
@@ -677,10 +683,10 @@ public class Parse
 		
 		// Get the storage object associated with this key.
 		storedObject = storage.get(key);
-		if(storedObject == null)
+		/* if(storedObject == null)
 		{
 			error("identifier could not be mapped to an existing item in storage");
-		}
+		}*/
 		
 		// We need to check to make sure all these fields match.
 		// If not, the value can't be updated and we need to raise an error.
@@ -692,90 +698,7 @@ public class Parse
 		// If the stored object is an istance of a Boolean,
 		// try to evaluate the right res2 val to a Boolean.
 		Object valueToStore = null;
-		if(storedObject instanceof  Boolean)
-		{
-			if(stEntry.dclType != Token.BOOLEAN)
-			{
-				error("storage object and identifier types do not match");
-			}
-			
-			if(res2.iDataType == Token.BOOLEAN)
-			{
-				valueToStore = res2.value;
-			}
-			else if(res2.iDataType == Token.STRING)
-			{
-				valueToStore = new Boolean(Boolean.parseBoolean(((StringBuilder) res2.value).toString()));
-			}
-			else if(res2.isNum)
-			{
-				error("cannot coerce numeric types to boolean values");
-			}
-			storage.put(key, valueToStore);
-			res = new ResultValue(stEntry.dclType, valueToStore);
-		}
-		else if(storedObject instanceof Numeric)
-		{
-			if(stEntry.dclType != Token.INTEGER && stEntry.dclType != Token.FLOAT)
-			{
-				error("storage object and idnetifier types do not match");
-			}
-
-			if(res2.iDataType == Token.BOOLEAN)
-			{
-				error("cannot coerce boolean to numeric type");
-			}
-			else if(res2.iDataType == Token.STRING)
-			{
-				if(stEntry.dclType == Token.INTEGER)
-				{
-					valueToStore = new Numeric("" + Integer.parseInt(((StringBuilder) res2.value).toString()), Token.INTEGER);
-				}
-				else if(stEntry.dclType == Token.FLOAT)
-				{
-					valueToStore = new Numeric("" + Double.parseDouble(((StringBuilder) res2.value).toString()), Token.FLOAT);
-				}
-			}
-			else if(res2.isNum)
-			{
-				valueToStore = new Numeric(((Numeric) res2.value).toString(), stEntry.dclType);
-			}
-			
-			storage.put(key, valueToStore);
-			res = new ResultValue(stEntry.dclType, valueToStore);
-		}
-		else if(storedObject instanceof StringBuilder)
-		{
-			if(stEntry.dclType != Token.STRING)
-			{
-				error("storage object and identifier types do not match");
-			}
-		
-			if(res2.iDataType == Token.BOOLEAN)
-			{
-				if(((Boolean) res2.value).booleanValue())
-				{
-					valueToStore = new StringBuilder("T");
-				}
-				else
-				{
-					valueToStore = new StringBuilder("F");
-				}
-			}
-			else if(res2.iDataType == Token.STRING)
-			{
-				valueToStore = new StringBuilder(((StringBuilder) res2.value).toString());
-			}
-			else if(res2.isNum)
-			{
-				valueToStore = new StringBuilder(((Numeric) res2.value).toString());
-			}
-			
-	
-			storage.put(key, valueToStore);
-			res = new ResultValue(stEntry.dclType, valueToStore);
-		}
-		else if(storedObject instanceof HavabolArray)
+		if(storedObject instanceof HavabolArray)
 		{
 			if(res2.value instanceof HavabolArray)
 			{
@@ -791,15 +714,9 @@ public class Parse
 		}
 		else
 		{
-			/**System.out.println("CURRENT KEY WHICH FAILED LOOKUP: " + key);
-			if(storedObject instanceof Boolean)
-			{
-				System.out.println("WTF M8");
-			}
-			System.out.println(storedObject.getClass().getSimpleName());
-			System.out.println(res2);
-			System.out.println(stEntry);**/
-			error("could not match storage object, symbol table entry, and data type of value to store");
+			res = ResultValue.convertType(stEntry.dclType, res2);
+			valueToStore = res.value;
+			storage.put(key, valueToStore);
 		}
 		
 		return res;
@@ -1183,22 +1100,18 @@ public class Parse
 		STIdentifier stEntry = new STIdentifier(scan.nextToken.tokenStr, Token.IDENTIFIER);
 		if(scan.currentToken.tokenStr.equals("Bool"))
 		{
-			stObject = new Boolean(false);
 			stEntry.dclType = Token.BOOLEAN;
 		}
 		else if(scan.currentToken.tokenStr.equals("Int"))
 		{
-			stObject = new Numeric();
 			stEntry.dclType = Token.INTEGER;
 		}
 		else if(scan.currentToken.tokenStr.equals("Float"))
 		{
-			stObject = new Numeric();
 			stEntry.dclType = Token.FLOAT;
 		}
 		else if(scan.currentToken.tokenStr.equals("String"))
 		{
-			stObject = new StringBuilder();
 			stEntry.dclType = Token.STRING;
 		}
 		else
