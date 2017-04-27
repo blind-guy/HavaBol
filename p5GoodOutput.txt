@@ -1,0 +1,95 @@
+Assignment tests. 
+helloStr is set to: Hello World! 
+arrTestCounter is set to: 0 
+reverseIt is set to: T 
+
+Testing array assignment to helloArr 
+Copying chars from helloStr to helloArr. 
+Printing elements copied to helloArr. 
+H 
+e 
+l 
+l 
+o 
+  
+W 
+o 
+r 
+l 
+d 
+! 
+second inner loop 
+first inner loop 
+second inner loop 
+outer loop 
+second inner loop 
+first inner loop 
+second inner loop 
+n =  2 
+n =  4 
+iVal = 	 10 
+iVal = 	 30 
+iVal = 	 50 
+iVal = 	 10 
+iVal = 	 20 
+iVal = 	 30 
+iVal = 	 40 
+iVal = 	 50 
+iVal = 	 60 
+iVal = 	 10 
+iVal = 	 20 
+iVal = 	 30 
+iVal = 	 40 
+iVal = 	 50 
+iVal = 	 60 
+ch= S 
+ch= n 
+ch= o 
+ch= o 
+ch= z 
+iVal = 	 15 
+iVal = 	 25 
+iVal = 	 35 
+iVal = 	 45 
+iVal = 	 55 
+iVal = 	 65 
+ch= a 
+ch= a 
+ch= a 
+ch= a 
+ch= a 
+have a	 ball
+ 
+2 2 3 
+F 
+9 
+5 
+5 
+i = 4 + (5 - 6) * 2 
+i+2 i+i:  4 4 
+i+2 == 2: F 
+i+2 >= 2: T 
+2 <= i+2: T 
+"" # i^4.5  == 256 T 
+hi there 
+LENGTH("hi there") = 8 or 8 
+T 
+hi there only contains spaces or is empty: F 
+      only contains spaces or is empty: T 
+ only contains spaces or is empty: T 
+array[0] + array[1] + array[2] = 6 
+hi[1] i 
+ere the rite i hie 
+ereht 
+ELEM(array): 3 MAXELEM(array): 3 
+TYPE: INTEGER, MAXELEM: 3, ELEM: 3, UNBOUNDED: F VALUES[1, 2, 3] 
+TYPE: INTEGER, MAXELEM: 3, ELEM: 3, UNBOUNDED: F VALUES[4, 5, 6] 
+TYPE: INTEGER, MAXELEM: 3, ELEM: 3, UNBOUNDED: F VALUES[1, 2, 2] 
+
+While loop to copy reversed helloStr with String subscripting. 
+"Hello World!" reversed is "!dlroW olleH!". 
+
+Testing String subscripting in assignment. 
+forStr is set to: for 
+reignStr is set to: reign 
+forStr[2] = reignStr yields: foreign 

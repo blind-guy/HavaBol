@@ -1,0 +1,11 @@
+This file details the source files located in src/havabol and who worked on each file towards the completion of program 5.
+
+Source File Name:               Primary Responsible Team Member:    Reviewer:
+
+Parse.java                      all memebers                        all members
+
+Description of Member Activities:
+
+Jake Willis 	- implemented various bug fixes and improvements
+Elijah Arnold 	- implemented various bug fixes and improvements
+Charles Dix		- implemented various bug fixes and improvements

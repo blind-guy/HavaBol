@@ -1,3 +1,0 @@
-Bool foo = T;
-String fooStr = foo;
-print(fooStr);
