@@ -439,6 +439,10 @@ public class Parse
 			}
 			else
 			{
+				if(index < 0)
+				{
+					index = index + ((StringBuilder) stObject).toString().length();
+				}
 				int currentIndex = 0;
 				while(currentIndex < index)
 				{
