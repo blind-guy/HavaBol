@@ -1,0 +1,8 @@
+Int iCM[6] = 10, 20, 30, 40, 50, 60;
+for iVal iCM:
+    print("iVal = \t", iVal);
+endfor;
+
+// format of the for loop
+// control variable needs to be
+// followed by a '=' or an 'in'

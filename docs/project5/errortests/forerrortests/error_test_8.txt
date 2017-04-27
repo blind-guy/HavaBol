@@ -1,0 +1,7 @@
+Int iCM[6] = 10, 20, 30, 40, 50, 60;
+for iVal in iCM:
+    print("iVal = \t", iVal);
+
+endfor
+
+// no ';' at the end of the for statement

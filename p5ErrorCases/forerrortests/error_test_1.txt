@@ -1,0 +1,7 @@
+Int n = 5;
+Int iCM[6] = 10, 20, 30, 40, 50, 60;
+for iVal in n:
+    print("iVal = \t", iVal);
+endfor;
+// the variable n is not an array or
+// string. throws and error

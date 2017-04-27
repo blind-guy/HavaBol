@@ -1,0 +1,7 @@
+String sleep = "snooz"
+Int n = 6;
+for in sleep:
+    print("iVal = \t", iVal);
+    
+endfor;
+// missing 'control value' in for statement

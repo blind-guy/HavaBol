@@ -1,0 +1,8 @@
+Int iCM[6] = 10, 20, 30, 40, 50, 60;
+iVal in iCM:
+    print("iVal = \t", iVal);
+endfor;
+
+// for is missing from the for statement
+// throws an error stating trying to preform
+// an operation with an uninitiaized variable

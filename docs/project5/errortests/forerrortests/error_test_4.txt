@@ -1,0 +1,8 @@
+Int iCM[6] = 10, 20, 30, 40, 50, 60;
+for iVal in :
+    print("iVal = \t", iVal);
+endfor;
+
+// missing an array or string 
+// error is that next value must
+// be a string of an array

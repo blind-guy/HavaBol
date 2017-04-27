@@ -1,0 +1,8 @@
+Bool foo = F;
+if foo:
+	print("hi");
+else:
+	print("bye");
+
+
+// no endif statement at the end of if statement

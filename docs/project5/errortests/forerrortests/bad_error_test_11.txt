@@ -1,0 +1,12 @@
+Int iCM[6] = 10, 20, 30, 40, 50, 60;
+Int n = 6;
+for iVal = 0 to n by 1
+    print("iVal = \t", iVal);
+    
+endfor;
+// missing ':' at the end of line 3
+// problem the call to expressions after the by
+// statement does not return at the print statement
+// actually i don't know what is happening. but the
+// program never makes it to my check for a ':' at the
+// end of the statement

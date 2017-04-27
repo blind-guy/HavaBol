@@ -396,7 +396,17 @@ public class Parse
 						System.out.println("BINGO");
 						System.exit(0);
 					}
-					resValToStore = ResultValue.convertType(array.dclType, resValToStore);
+					try
+					{
+						resValToStore = ResultValue.convertType(array.dclType, resValToStore);
+					}
+					catch(Exception e)
+					{
+						if(bFlag)
+						{
+							error(e.toString());
+						}
+					}
 					if(bFlag)
 					{
 						array.put(resValToStore, ((Numeric) indexResVal.value).intValue);
@@ -802,8 +812,17 @@ public class Parse
 					   scan.currentToken.tokenStr.equals("["))
 					{
 						int index = getSubscript();
-						tempeh = ((HavabolArray) tempeh.value).getElement(index);
-						
+						try
+						{
+							tempeh = ((HavabolArray) tempeh.value).getElement(index);
+						}
+						catch(IndexOutOfBoundsException e)
+						{
+							if(exec)
+							{
+								error("Out of bounds error with index of " + index);
+							}
+						}
 						tempTok = new Token(tempeh.value.toString());
 						tempTok.primClassif = Token.OPERAND;
 						tempTok.subClassif = tempeh.iDataType;
@@ -838,9 +857,15 @@ public class Parse
 					else if (index < 0)
 						index = tempeh.value.toString().length() + index;
 					
-					tempeh = new ResultValue(Token.STRING, 
+					try
+					{
+						tempeh = new ResultValue(Token.STRING, 
 							(tempeh.value.toString()).substring(index, index+1));
-					
+					}
+					catch(StringIndexOutOfBoundsException e)
+					{
+						error("String index out of bounds error with index of " + index);
+					}
 					tempTok = new Token(tempeh.value.toString());
 					tempTok.primClassif = Token.OPERAND;
 					tempTok.subClassif = tempeh.iDataType;
@@ -998,8 +1023,12 @@ public class Parse
 			else
 				res = resultStack.pop();
 			//System.out.println(res.toString());
-		} catch (Exception e) {
-			error(e.toString());
+		} catch (Exception e) 
+		{
+			if(exec)
+			{
+				error(e.toString());
+			}
 		}
 		
 		return res;
@@ -1094,8 +1123,7 @@ public class Parse
 		if(scan.nextToken.primClassif != Token.OPERAND &&
 		   scan.nextToken.subClassif != Token.IDENTIFIER)
 		{
-			scan.nextToken.printToken();
-			error("expected a valid variable name for declare");
+			error("variable \"" + scan.nextToken.tokenStr + "\" was already declared");
 		}
 
 		// Check to see if the identifier is linked to an existing variable.

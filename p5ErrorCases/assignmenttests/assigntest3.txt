@@ -1,0 +1,4 @@
+Int t = 3;
+print(t);
+Int t = 4;
+print(t);

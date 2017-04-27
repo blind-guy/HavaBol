@@ -1,0 +1,7 @@
+String sleep = "snooz"
+Int n = 6;
+for iVal in sleep
+    print("iVal = \t", iVal);
+    
+endfor;
+// missing ':' at the end of line 3

@@ -1,0 +1,5 @@
+Int cond = 2;
+while(cond > 0):
+            print("Hello World!");
+            cond -= 1;
+endwhile

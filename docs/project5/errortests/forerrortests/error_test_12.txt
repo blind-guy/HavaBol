@@ -1,0 +1,7 @@
+String sleep = "snooz"
+Int n = 6;
+for iVal  sleep:
+    print("iVal = \t", iVal);
+    
+endfor;
+// missing 'in' statement in the for loop

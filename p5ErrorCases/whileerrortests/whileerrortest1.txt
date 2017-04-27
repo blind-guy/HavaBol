@@ -1,0 +1,4 @@
+Int cond = 4;
+while(cond):
+    print("Hello World!");
+endwhile;

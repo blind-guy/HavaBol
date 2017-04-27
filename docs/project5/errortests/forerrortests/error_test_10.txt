@@ -1,0 +1,7 @@
+Int iCM[6] = 10, 20, 30, 40, 50, 60;
+Int n = 6;
+for iVal = 0 by 1:
+    print("iVal = \t", iCM[iVal]);
+    
+endfor;
+// missing 'to' statement in counting for loop

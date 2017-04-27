@@ -22,16 +22,6 @@ for elem in helloArr:
             print(elem);
 endfor;
 
-// Simple if/else test.
-Bool foo = F;
-print("Testing simple if else.");
-print("foo is set to:", foo);
-if foo:
-            print("\tCondition is true with foo.");
-else:
-            print("\tCondition is false with foo.");
-endif;
-
     // Test case for both if and for statements.
 String sleep = 'Snooz';
 Int iCM[6] = 10, 20, 30, 40, 50, 60;

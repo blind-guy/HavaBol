@@ -1,0 +1,1 @@
+String strArr[3] = "cat", "dog", "snake", "mouse";

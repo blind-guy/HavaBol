@@ -1,0 +1,3 @@
+if (1 + 2 and 3 < 2):
+    print("This will throw an error");
+endif;
