@@ -714,7 +714,11 @@ public class Parse
 		}
 		else
 		{
+			try {
 			res = ResultValue.convertType(stEntry.dclType, res2);
+			} catch (Exception e) {
+				error(e.toString());
+			}
 			valueToStore = res.value;
 			storage.put(key, valueToStore);
 		}
@@ -943,55 +947,60 @@ public class Parse
 		ResultValue rightOpResVal, leftOpResVal, endResVal;
 		Token tempTok;
 		
-		for (int i=0; i<postfixExpr.size(); i++)
-		{
-			tempTok = postfixExpr.get(i);
-			//System.out.println("token: " + tempTok.tokenStr);
-			if (tempTok.primClassif == Token.OPERAND || tempTok.primClassif == Token.IDENTIFIER)
-			{
-				//endResVal = convertGivenTokenToResultValue(tempTok);
-				//System.out.println(tempTok.tokenStr + " " + tempTok.subClassif);
-				endResVal = getValueOfToken(tempTok);
-				
-				resultStack.push(endResVal);
-			}
-			else if (tempTok.primClassif == Token.OPERATOR)
-			{
-				// precedence of 12 indicates unary minus
-				if (tempTok.tokenStr.equals("not") || tempTok.precedence == 12)
-				{
-					if (resultStack.isEmpty())
-						error("Invalid expression");
-					
-					rightOpResVal = resultStack.pop();
-					resultStack.push(rightOpResVal.performOperation(null, tempTok.tokenStr));
-				}
-				else 
-				{
-					if (resultStack.size() < 2)
-						error("Invalid expression");
-					
-					rightOpResVal = resultStack.pop();
-					leftOpResVal = resultStack.pop();
-					resultStack.push(leftOpResVal.performOperation(rightOpResVal, tempTok.tokenStr));
-				}
-			}
-			else
-			{
-				error("Invalid expression. Expected operands or operators in expression.");
-			}
-		}
-
-		if(scan.dBug.bShowExpr)
-		{
-			System.out.println("EVALUATION OF EXPRESSION RETURNED: \n\t" + res);
-		}
+		try {
 		
-		if (resultStack.size() != 1)
-			error("Invalid expression.");
-		else
-			res = resultStack.pop();
-		//System.out.println(res.toString());
+			for (int i=0; i<postfixExpr.size(); i++)
+			{
+				tempTok = postfixExpr.get(i);
+				//System.out.println("token: " + tempTok.tokenStr);
+				if (tempTok.primClassif == Token.OPERAND || tempTok.primClassif == Token.IDENTIFIER)
+				{
+					//endResVal = convertGivenTokenToResultValue(tempTok);
+					//System.out.println(tempTok.tokenStr + " " + tempTok.subClassif);
+					endResVal = getValueOfToken(tempTok);
+					
+					resultStack.push(endResVal);
+				}
+				else if (tempTok.primClassif == Token.OPERATOR)
+				{
+					// precedence of 12 indicates unary minus
+					if (tempTok.tokenStr.equals("not") || tempTok.precedence == 12)
+					{
+						if (resultStack.isEmpty())
+							error("Invalid expression");
+						
+						rightOpResVal = resultStack.pop();
+						resultStack.push(rightOpResVal.performOperation(null, tempTok.tokenStr));
+					}
+					else 
+					{
+						if (resultStack.size() < 2)
+							error("Invalid expression");
+						
+						rightOpResVal = resultStack.pop();
+						leftOpResVal = resultStack.pop();
+						resultStack.push(leftOpResVal.performOperation(rightOpResVal, tempTok.tokenStr));
+					}
+				}
+				else
+				{
+					error("Invalid expression. Expected operands or operators are missing in expression.");
+				}
+			}
+	
+			if(scan.dBug.bShowExpr)
+			{
+				System.out.println("EVALUATION OF EXPRESSION RETURNED: \n\t" + res);
+			}
+			
+			if (resultStack.size() != 1)
+				error("Invalid expression.");
+			else
+				res = resultStack.pop();
+			//System.out.println(res.toString());
+		} catch (Exception e) {
+			error(e.toString());
+		}
 		
 		return res;
 	}
